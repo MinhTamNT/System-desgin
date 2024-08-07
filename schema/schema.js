@@ -39,4 +39,10 @@ type Query {
   name: String
 }
 
+type Mutation {
+    addUser(username: String!, profilePicture: String, roleId: Int!): User
+}
+
+
+
 `;
