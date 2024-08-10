@@ -1,6 +1,5 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "@apollo/server";
 import bodyParser from "body-parser";
 import cors from "cors";
 import "dotenv/config";
@@ -12,6 +11,8 @@ import { resolvers } from "./resolvers/resolvers.js";
 import { typeDefs } from "./schema/schema.js";
 import { configMySql } from "./config/mysqlConfig.js";
 import mongoose from "mongoose";
+import { Authority } from "./middleware/verifyToken.js";
+import { expressMiddleware } from "@apollo/server/express4";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -27,7 +28,6 @@ const serverCleanup = useServer({ schema }, wsServer);
 const server = new ApolloServer({
   schema,
   plugins: [
-    ApolloServerPluginDrainHttpServer({ httpServer }),
     {
       async serverWillStart() {
         return {
@@ -42,10 +42,18 @@ const server = new ApolloServer({
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(Authority);
 
 async function startApolloServer() {
   await server.start();
-  server.applyMiddleware({ app, path: "/graphql" });
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context: ({ req, res }) => ({
+        uuid: res.locals.uuid,
+      }),
+    })
+  );
 }
 
 configMySql.connect(function (err) {
@@ -54,7 +62,7 @@ configMySql.connect(function (err) {
 });
 
 const url = `mongodb+srv://${process.env.DB_NAME_MONGODB}:${process.env.DB_PASSWORD_MONGODB}@cluster0.v49ij.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-//Connect to mongodb
+// Connect to MongoDB
 mongoose
   .connect(url, {
     useNewUrlParser: true,
@@ -63,6 +71,7 @@ mongoose
   .then(() => console.log("Connection to database successful"))
   .catch((error) => console.error("Error connecting to database:", error));
 
+// Start Apollo Server and listen for incoming requests
 startApolloServer().then(() => {
   httpServer.listen({ port: PORT }, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
