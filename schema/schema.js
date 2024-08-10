@@ -4,7 +4,6 @@ scalar Date
 enum NameRole {
   ROLE_ADMIN
   ROLE_USER
-  ROLE_GUEST
 }
 
 enum Permission {
@@ -14,33 +13,25 @@ enum Permission {
 
 type Role {
   name: NameRole
-  permissions: [Permission]
 }
 
 type User {
   idUser: Int
-  username: String
+  name: String
   profilePicture: String
   createdAt: Date
   updatedAt: Date
   roleId: Int
 }
 
-type Authenticate {
-  idAuthenticate: Int
-  authType: String
-  authId: String
-  createdAt: Date
-  updatedAt: Date
-  userId: Int
-}
+
 
 type Query {
   name: String
 }
 
 type Mutation {
-    addUser(username: String!, profilePicture: String, roleId: Int!): User
+    addUser(name: String!, profilePicture: String, roleId: Int! , uuid : String ): User
 }
 
 

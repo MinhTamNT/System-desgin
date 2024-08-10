@@ -1,13 +1,9 @@
 export const INSERT_USER = `
-  INSERT INTO User (username, profilePicture, roleId, createdAt, updatedAt)
-  VALUES (?, ?, ?, NOW(), NOW())
+  INSERT INTO User (name, profilePicture, Role_idRole, createdAt, updatedAt,uuid)
+  VALUES (?, ?, ?, NOW(), NOW(), ?)
 `;
 
-export const INSERT_AUTHENTICATE = `
-  INSERT INTO Authenticate (authType, authId, createdAt, updatedAt, userId)
-  VALUES (?, ?, NOW(), NOW(), ?)
+export const CHECK_USER_EXISTS = `
+  SELECT * FROM User WHERE name = ?
 `;
-
-export const SELECT_AUTHENTICATE_BY_USER_ID = `
-  SELECT * FROM Authenticate WHERE userId = ?
-`;
+  

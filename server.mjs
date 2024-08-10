@@ -11,6 +11,7 @@ import { WebSocketServer } from "ws";
 import { resolvers } from "./resolvers/resolvers.js";
 import { typeDefs } from "./schema/schema.js";
 import { configMySql } from "./config/mysqlConfig.js";
+import mongoose from "mongoose";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -51,6 +52,16 @@ configMySql.connect(function (err) {
   if (err) throw err;
   console.log("Connected Mysql !!!");
 });
+
+const url = `mongodb+srv://${process.env.DB_NAME_MONGODB}:${process.env.DB_PASSWORD_MONGODB}@cluster0.v49ij.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+//Connect to mongodb
+mongoose
+  .connect(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Connection to database successful"))
+  .catch((error) => console.error("Error connecting to database:", error));
 
 startApolloServer().then(() => {
   httpServer.listen({ port: PORT }, () => {
