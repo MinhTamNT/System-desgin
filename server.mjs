@@ -13,7 +13,7 @@ import { configMySql } from "./config/mysqlConfig.js";
 import mongoose from "mongoose";
 import { Authority } from "./middleware/verifyToken.js";
 import { expressMiddleware } from "@apollo/server/express4";
-
+import cookieParser from "cookie-parser";
 const app = express();
 const httpServer = http.createServer(app);
 const schema = makeExecutableSchema({ typeDefs, resolvers });

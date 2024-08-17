@@ -11,6 +11,13 @@ enum Permission {
   ROLE_READ
 }
 
+enum Status {
+  STENT
+  REJECTED
+  ACCPEDTED
+}
+
+
 type Role {
   name: NameRole
 }
@@ -25,7 +32,7 @@ type User {
 }
 
 type Project {
- idProject: String!
+  idProject: String!
   name: String!
   description: String
   createdAt: String
@@ -35,6 +42,24 @@ type Project {
 
 }
 
+type Inivitation {
+  idInvitation:String!,
+  email_content: String!,
+  status: Status,
+  createdAt:Date,
+  updatedAt : Date,
+  Project_idProject: String!,
+  User_idUser_requested : String!,
+  User_idUser_invited: String!
+}
+
+type Notification {
+  idNotification: String!,
+  message:String,
+  is_read : Boolean,
+  createdAt:Date,
+  userTaker:String!,
+}
 
 type Query {
   getUserProjects: [Project]
@@ -43,9 +68,11 @@ type Query {
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! ): User
     addProject(name:String!,description:String!):Project
+    InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
+    createNotification(message:String! , userTaker: String!): Notification
+}
+type Subscription {
+  notificationCreated: Notification
 
 }
-
-
-
 `;

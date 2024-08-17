@@ -9,7 +9,7 @@ import {
 const addProject = async (_, { name, description }, context) => {
   let connection;
   try {
-    console.log("Context User UUID", context?.uuid);
+    console.log(context?.uuid);
     connection = await pool.getConnection();
     const idProject = uuidv4();
     await connection.beginTransaction();
@@ -47,7 +47,6 @@ const addProject = async (_, { name, description }, context) => {
 const getUserProjects = async (_, __, context) => {
   let connection;
   try {
-    console.log("Context User UUID", context?.uuid);
     connection = await pool.getConnection();
 
     const [projects] = await connection.query(GET_PROJECT_BY_ID, [
@@ -55,7 +54,7 @@ const getUserProjects = async (_, __, context) => {
     ]);
     return projects.map((project) => ({
       ...project,
-      is_host_user: Boolean(project.is_host_user), // Convert to boolean if necessary
+      is_host_user: Boolean(project.is_host_user),
     }));
   } catch (error) {
     throw new Error("Error fetching user projects: " + error.message);
