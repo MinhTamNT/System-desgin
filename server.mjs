@@ -71,7 +71,6 @@ mongoose
   .then(() => console.log("Connection to database successful"))
   .catch((error) => console.error("Error connecting to database:", error));
 
-// Start Apollo Server and listen for incoming requests
 startApolloServer().then(() => {
   httpServer.listen({ port: PORT }, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);

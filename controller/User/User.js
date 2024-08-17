@@ -1,12 +1,11 @@
 import { pool } from "../../config/mysqlConfig.js";
 import { INSERT_USER, CHECK_USER_EXISTS } from "../../Query/user.js";
-
 const checkUserExists = async (name) => {
   const [rows] = await pool.query(CHECK_USER_EXISTS, [name]);
   return rows.length > 0;
 };
 
-const addNewUser = async (_, { name, profilePicture, roleId, uuid }) => {
+const addNewUser = async (_, { idUser, name, profilePicture, roleId }) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -16,22 +15,16 @@ const addNewUser = async (_, { name, profilePicture, roleId, uuid }) => {
     }
 
     await connection.beginTransaction();
-
     const [result] = await connection.query(INSERT_USER, [
+      idUser,
       name,
       profilePicture,
       roleId,
-      uuid,
     ]);
-
-    const newUserId = result.insertId;
-
-    console.log(newUserId);
 
     await connection.commit();
 
     return {
-      idUser: newUserId,
       name,
       profilePicture,
       roleId,
@@ -45,5 +38,5 @@ const addNewUser = async (_, { name, profilePicture, roleId, uuid }) => {
     if (connection) connection.release();
   }
 };
-    
+
 export { addNewUser };

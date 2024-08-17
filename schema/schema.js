@@ -24,6 +24,14 @@ type User {
   roleId: Int
 }
 
+type Project {
+  idProject:String,
+  name:String,
+  description:String,  
+  createdAt: Date
+  updatedAt: Date
+
+}
 
 
 type Query {
@@ -31,7 +39,9 @@ type Query {
 }
 
 type Mutation {
-    addUser(name: String!, profilePicture: String, roleId: Int! , uuid : String ): User
+    addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! ): User
+    addProject(name:String!,description:String!):Project
+
 }
 
 
