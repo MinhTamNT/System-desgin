@@ -1,6 +1,10 @@
 import { pool } from "../../config/mysqlConfig.js";
 import { v4 as uuidv4 } from "uuid";
-import { INSERT_PROJECT, INSERT_USER_PROJECT } from "../../Query/project.js";
+import {
+  INSERT_PROJECT,
+  INSERT_USER_PROJECT,
+  GET_PROJECT_BY_ID,
+} from "../../Query/project.js";
 
 const addProject = async (_, { name, description }, context) => {
   let connection;
@@ -40,4 +44,24 @@ const addProject = async (_, { name, description }, context) => {
   }
 };
 
-export { addProject };
+const getUserProjects = async (_, __, context) => {
+  let connection;
+  try {
+    console.log("Context User UUID", context?.uuid);
+    connection = await pool.getConnection();
+
+    const [projects] = await connection.query(GET_PROJECT_BY_ID, [
+      context?.uuid,
+    ]);
+    return projects.map((project) => ({
+      ...project,
+      is_host_user: Boolean(project.is_host_user), // Convert to boolean if necessary
+    }));
+  } catch (error) {
+    throw new Error("Error fetching user projects: " + error.message);
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+export { addProject, getUserProjects };

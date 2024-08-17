@@ -1,8 +1,10 @@
-import { addProject } from "../controller/Project/Project.js";
+import { addProject, getUserProjects } from "../controller/Project/Project.js";
 import { addNewUser } from "../controller/User/User.js";
 
 export const resolvers = {
-  Query: {},
+  Query: {
+    getUserProjects: getUserProjects,
+  },
   Mutation: {
     addUser: addNewUser,
     addProject: addProject,

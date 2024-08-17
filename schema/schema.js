@@ -25,17 +25,19 @@ type User {
 }
 
 type Project {
-  idProject:String,
-  name:String,
-  description:String,  
-  createdAt: Date
-  updatedAt: Date
+ idProject: String!
+  name: String!
+  description: String
+  createdAt: String
+  updatedAt: String
+  access: String
+  is_host_user: Boolean
 
 }
 
 
 type Query {
-  name: String
+  getUserProjects: [Project]
 }
 
 type Mutation {
