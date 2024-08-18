@@ -1,5 +1,9 @@
 import { pool } from "../../config/mysqlConfig.js";
-import { INSERT_USER, CHECK_USER_EXISTS } from "../../Query/user.js";
+import {
+  INSERT_USER,
+  CHECK_USER_EXISTS,
+  SEARCH_USER_NAME,
+} from "../../Query/user.js";
 const checkUserExists = async (name) => {
   const [rows] = await pool.query(CHECK_USER_EXISTS, [name]);
   return rows.length > 0;
@@ -39,4 +43,20 @@ const addNewUser = async (_, { idUser, name, profilePicture, roleId }) => {
   }
 };
 
-export { addNewUser };
+const SearchUserByName = async (_, { searchText }) => {
+  let connect;
+  try {
+    connect = await pool.getConnection();
+    await connect.beginTransaction();
+    const [resut] = await connect.query(SEARCH_USER_NAME, [`%${searchText}%`]);
+    console.log(resut);
+    return resut;
+  } catch (error) {
+    console.error("Error searching user:", error);
+    throw error;
+  } finally {
+    if (connect) connect.release();
+  }
+};
+
+export { addNewUser, SearchUserByName };

@@ -63,13 +63,14 @@ type Notification {
 
 type Query {
   getUserProjects: [Project]
+  searchUserByName(searchText:String!):[User]
 }
 
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! ): User
     addProject(name:String!,description:String!):Project
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
-    createNotification(message:String! , userTaker: String!): Notification
+    createNotification(message:String! , userTaker: String!): Notification,
 }
 type Subscription {
   notificationCreated: Notification
