@@ -23,7 +23,7 @@ type Role {
 }
 
 type User {
-  idUser: Int
+  idUser: String
   name: String
   profilePicture: String
   createdAt: Date
@@ -58,12 +58,13 @@ type Notification {
   message:String,
   is_read : Boolean,
   createdAt:Date,
-  userTaker:String!,
+  userTaker:[User],
 }
 
 type Query {
   getUserProjects: [Project]
   searchUserByName(searchText:String!):[User]
+  getNotificationsByUserId: [Notification]
 }
 
 type Mutation {

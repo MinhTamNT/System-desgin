@@ -1,9 +1,7 @@
-import { pool } from "../../config/mysqlConfig.js";
 import { v4 as uuidv4 } from "uuid";
+import { pool } from "../../config/mysqlConfig.js";
 import { ADD_INIVITATION } from "../../Query/invitation.js";
-import { createNotification } from "../controller/Notification/Notification.js";
-import { sendEmail } from "../../helper/mail.js";
-
+import { createNotfication } from "../Notification/Notification.js";
 const InivitationUser = async (
   _,
   { email_content, projectId, userInvited },
@@ -24,14 +22,14 @@ const InivitationUser = async (
       userInvited,
     ]);
 
-    await createNotification(_, {
+    await createNotfication(_, {
       message: `You have been invited to join the project ${projectId}`,
       userTaker: userInvited,
     });
 
     await connection.commit();
-
-    return result;
+    console.log(result);
+    return result[0];
   } catch (error) {
     if (connection) await connection.rollback();
     throw new Error("Error inviting user: " + error.message);

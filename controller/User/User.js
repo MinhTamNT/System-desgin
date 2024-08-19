@@ -49,7 +49,6 @@ const SearchUserByName = async (_, { searchText }) => {
     connect = await pool.getConnection();
     await connect.beginTransaction();
     const [resut] = await connect.query(SEARCH_USER_NAME, [`%${searchText}%`]);
-    console.log(resut);
     return resut;
   } catch (error) {
     console.error("Error searching user:", error);
