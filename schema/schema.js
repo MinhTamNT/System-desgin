@@ -25,6 +25,7 @@ type Role {
 type User {
   idUser: String
   name: String
+  email:String
   profilePicture: String
   createdAt: Date
   updatedAt: Date
@@ -68,10 +69,10 @@ type Query {
 }
 
 type Mutation {
-    addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! ): User
+    addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! , email:String!): User
     addProject(name:String!,description:String!):Project
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
-    createNotification(message:String! , userTaker: String!): Notification,
+    createNotification(message:String! , userTaker: String! , invitation_idInvitation:String!): Notification,
 }
 type Subscription {
   notificationCreated: Notification

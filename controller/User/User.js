@@ -9,7 +9,10 @@ const checkUserExists = async (name) => {
   return rows.length > 0;
 };
 
-const addNewUser = async (_, { idUser, name, profilePicture, roleId }) => {
+const addNewUser = async (
+  _,
+  { idUser, name, profilePicture, roleId, email }
+) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -24,6 +27,7 @@ const addNewUser = async (_, { idUser, name, profilePicture, roleId }) => {
       name,
       profilePicture,
       roleId,
+      email,
     ]);
 
     await connection.commit();

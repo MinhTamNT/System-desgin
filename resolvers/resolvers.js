@@ -1,6 +1,6 @@
 import { PubSub } from "graphql-subscriptions";
 import {
-  createNotfication,
+  createNotification,
   getNotificationsByUserId,
 } from "../controller/Notification/Notification.js";
 import { addProject, getUserProjects } from "../controller/Project/Project.js";
@@ -14,10 +14,11 @@ export const resolvers = {
     searchUserByName: SearchUserByName,
     getNotificationsByUserId: getNotificationsByUserId,
   },
+  Notification: {},
   Mutation: {
     addUser: addNewUser,
     addProject: addProject,
-    createNotification: createNotfication,
+    createNotification: createNotification,
     InvitedUser: InivitationUser,
   },
   Subscription: {

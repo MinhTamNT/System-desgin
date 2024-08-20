@@ -6,28 +6,46 @@ import {
 } from "../../Query/notify.js";
 import { pubsub } from "../../resolvers/resolvers.js";
 
-const createNotfication = async (_, { message, userTaker }) => {
+const createNotification = async ({
+  message,
+  userTaker,
+  invitation_idInvitation,
+  userRequest,
+}) => {
   let connection;
   try {
+    if (!userRequest || !userTaker || !invitation_idInvitation) {
+      throw new Error("Missing required parameters");
+    }
     connection = await pool.getConnection();
+    await connection.beginTransaction();
+
     const idNotify = uuidv4();
-    let isRead = false;
+    const isRead = false;
+
+    // Insert notification
     const [result] = await connection.query(CREATED_NOTIFICATION, [
       idNotify,
       message,
       isRead,
+      invitation_idInvitation,
       userTaker,
+      userRequest,
     ]);
+
+    console.log(result);
     await connection.commit();
 
-    // Make sure to publish the correct data
+    // Publish notification event
     pubsub.publish("NOTIFICATION_CREATED", {
       notificationCreated: {
         idNotification: idNotify,
         message,
         is_read: isRead,
         createdAt: new Date().toISOString(),
+        invitation_idInvitation,
         userTaker,
+        userRequest: userRequest,
       },
     });
 
@@ -37,6 +55,7 @@ const createNotfication = async (_, { message, userTaker }) => {
       is_read: isRead,
       createdAt: new Date().toISOString(),
       userTaker,
+      userRequest,
     };
   } catch (error) {
     if (connection) await connection.rollback();
@@ -70,4 +89,4 @@ const getNotificationsByUserId = async (parent, args, context) => {
   }
 };
 
-export { createNotfication, getNotificationsByUserId };
+export { createNotification, getNotificationsByUserId };

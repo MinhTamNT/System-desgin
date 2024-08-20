@@ -14,3 +14,8 @@ from designdb.project as p join designdb.user_has_project as own on p.idProject 
 where own.User_idUser = ?
 
 `;
+
+
+export const GET_PROJECT_ID = `
+    select * from designdb.project as p where p.idProject = ?
+`
