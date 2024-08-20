@@ -14,7 +14,7 @@ enum Permission {
 enum Status {
   STENT
   REJECTED
-  ACCPEDTED
+  ACCEPTED
 }
 
 
@@ -59,20 +59,22 @@ type Notification {
   message:String,
   is_read : Boolean,
   createdAt:Date,
-  userTaker:[User],
+  invitation_idInvitation:String
+  userRequest: [User]
 }
 
 type Query {
   getUserProjects: [Project]
   searchUserByName(searchText:String!):[User]
   getNotificationsByUserId: [Notification]
+  getProjectTeams : [Project]
 }
 
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! , email:String!): User
     addProject(name:String!,description:String!):Project
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
-    createNotification(message:String! , userTaker: String! , invitation_idInvitation:String!): Notification,
+    updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
 }
 type Subscription {
   notificationCreated: Notification

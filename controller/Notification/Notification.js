@@ -23,7 +23,6 @@ const createNotification = async ({
     const idNotify = uuidv4();
     const isRead = false;
 
-    // Insert notification
     const [result] = await connection.query(CREATED_NOTIFICATION, [
       idNotify,
       message,
@@ -36,7 +35,6 @@ const createNotification = async ({
     console.log(result);
     await connection.commit();
 
-    // Publish notification event
     pubsub.publish("NOTIFICATION_CREATED", {
       notificationCreated: {
         idNotification: idNotify,
@@ -73,13 +71,12 @@ const getNotificationsByUserId = async (parent, args, context) => {
     const [result] = await connection.query(GET_NOTIFY_BY_USERID, [
       context?.uuid,
     ]);
-
+    console.log(result);
     const notifications = result.map((notification) => ({
       ...notification,
-      is_read: notification.is_read ? Boolean(notification.is_read) : false,
+      is_read: Boolean(notification.is_read),
     }));
-
-    await connection.commit();
+    console.log(notifications);
     return notifications;
   } catch (error) {
     if (connection) await connection.rollback();

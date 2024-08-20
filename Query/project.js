@@ -15,7 +15,13 @@ where own.User_idUser = ?
 
 `;
 
-
 export const GET_PROJECT_ID = `
     select * from designdb.project as p where p.idProject = ?
-`
+`;
+
+export const GET_PROJECT_TEAM = `
+SELECT p.idProject, p.name
+FROM designdb.project as p
+JOIN designdb.user_has_project as up ON p.idProject = up.Project_idProject
+WHERE up.User_idUser = ?
+`;

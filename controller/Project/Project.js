@@ -4,6 +4,7 @@ import {
   INSERT_PROJECT,
   INSERT_USER_PROJECT,
   GET_PROJECT_BY_ID,
+  GET_PROJECT_TEAM,
 } from "../../Query/project.js";
 
 const addProject = async (_, { name, description }, context) => {
@@ -63,4 +64,20 @@ const getUserProjects = async (_, __, context) => {
   }
 };
 
-export { addProject, getUserProjects };
+const getProjectTeams = async (parent, args, context) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const [res] = await connection.query(GET_PROJECT_TEAM, [context?.uuid]);
+    return projects.map((project) => ({
+      ...project,
+      is_host_user: Boolean(project.is_host_user),
+    }));
+  } catch (error) {
+    throw new Error("Error fetching user projects: " + error.message);
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+export { addProject, getUserProjects, getProjectTeams };
