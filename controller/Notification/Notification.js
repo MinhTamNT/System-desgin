@@ -11,6 +11,7 @@ const createNotification = async ({
   userTaker,
   invitation_idInvitation,
   userRequest,
+  type,
 }) => {
   let connection;
   try {
@@ -30,6 +31,7 @@ const createNotification = async ({
       invitation_idInvitation,
       userTaker,
       userRequest,
+      type,
     ]);
 
     console.log(result);
@@ -44,6 +46,7 @@ const createNotification = async ({
         invitation_idInvitation,
         userTaker,
         userRequest: userRequest,
+        type,
       },
     });
 
@@ -54,6 +57,7 @@ const createNotification = async ({
       createdAt: new Date().toISOString(),
       userTaker,
       userRequest,
+      type,
     };
   } catch (error) {
     if (connection) await connection.rollback();

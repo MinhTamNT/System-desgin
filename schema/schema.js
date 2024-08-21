@@ -11,6 +11,11 @@ enum Permission {
   ROLE_READ
 }
 
+enum TypeNotify {
+  INIVITED
+  STANDARD
+}
+
 enum Status {
   STENT
   REJECTED
@@ -56,6 +61,7 @@ type Inivitation {
 
 type Notification {
   idNotification: String!,
+  type : TypeNotify
   message:String,
   is_read : Boolean,
   createdAt:Date,

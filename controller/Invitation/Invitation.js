@@ -50,6 +50,7 @@ const InivitationUser = async (
       userTaker: userInvited,
       invitation_idInvitation: idInivitation,
       userRequest: context?.uuid,
+      type: "INIVITED",
     });
 
     const [getUser] = await connection.query(GET_USER_BY_ID, [userInvited]);
@@ -112,6 +113,7 @@ const updateInivitation = async (
         userRequest: context?.uuid,
         invitation_idInvitation,
         userTaker: getInivite[0].User_idUser_requested,
+        type: "STANDARD",
       });
     } else if (status === "REJECT") {
       await createNotification({
@@ -119,6 +121,7 @@ const updateInivitation = async (
         userRequest: context?.uuid,
         invitation_idInvitation,
         userTaker: userTaker,
+        type: "STANDARD",
       });
     }
     return result;
