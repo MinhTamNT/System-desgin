@@ -1,4 +1,5 @@
 import { pool } from "../../config/mysqlConfig.js";
+import User from "../../model/User.js";
 import {
   INSERT_USER,
   CHECK_USER_EXISTS,
@@ -14,15 +15,30 @@ const addNewUser = async (
   { idUser, name, profilePicture, roleId, email }
 ) => {
   let connection;
+
   try {
     connection = await pool.getConnection();
 
-    if (await checkUserExists(name)) {
+    // Check if the user already exists in MongoDB
+    const existingUser = await User.findOne({ uuid: idUser });
+    if (!existingUser) {
+      // Create a new user if not found
+      const newUser = new User({
+        name,
+        profilePicture,
+        uuid: idUser,
+      });
+      await newUser.save();
+    }
+
+    const userExistsInSQL = await checkUserExists(name);
+    if (userExistsInSQL) {
       return;
     }
 
     await connection.beginTransaction();
-    const [result] = await connection.query(INSERT_USER, [
+
+    await connection.query(INSERT_USER, [
       idUser,
       name,
       profilePicture,
@@ -43,6 +59,7 @@ const addNewUser = async (
     if (connection) await connection.rollback();
     throw new Error("Error adding user: " + error.message);
   } finally {
+    // Release the connection
     if (connection) connection.release();
   }
 };

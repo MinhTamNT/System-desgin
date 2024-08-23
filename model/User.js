@@ -1,6 +1,4 @@
-const mongoose = require("mongoose");
-var uniqueValidator = require("mongoose-unique-validator");
-
+import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -16,8 +14,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.plugin(uniqueValidator, {
-  message: "Error, expected {PATH} to be unique",
-});
+const User = mongoose.model("User", userSchema);
 
-module.exports = mongoose.model("User", userSchema);
+export default User;

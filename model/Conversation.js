@@ -2,9 +2,12 @@ import mongoose from "mongoose";
 
 const ConversationSchema = new mongoose.Schema(
   {
-    members: {
-      type: Array,
-    },
+    members: [
+      {
+        type: mongoose.Schema.Types.String,
+        ref: "User",
+      },
+    ],
     messageCount: {
       type: Number,
       default: 0,
@@ -16,3 +19,4 @@ const ConversationSchema = new mongoose.Schema(
 const Conversation = mongoose.model("Conversation", ConversationSchema);
 
 export default Conversation;
+60

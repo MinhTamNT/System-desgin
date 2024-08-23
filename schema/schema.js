@@ -28,7 +28,8 @@ type Role {
 }
 
 type User {
-  idUser: String
+  idUser:String
+  uuid: String
   name: String
   email:String
   profilePicture: String
@@ -48,11 +49,27 @@ type Project {
 
 }
 
+
+type Conversation {
+  id: ID!
+  members : [User]
+  createdAt: Date
+  updatedAt: Date
+  messageCount: Int
+}
+
+
+type Message {
+  conversationId : ID 
+  sender : User 
+  text :  String 
+}
+
 type Inivitation {
   idInvitation:String!,
   email_content: String!,
   status: Status,
-  createdAt:Date,
+  createdAt:Date,                            
   updatedAt : Date,
   Project_idProject: String!,
   User_idUser_requested : String!,
@@ -74,6 +91,8 @@ type Query {
   searchUserByName(searchText:String!):[User]
   getNotificationsByUserId: [Notification]
   getProjectTeams : [Project]
+  getConversation: [Conversation]
+  getMessageConversationId(conversationId : String): [Message]
 }
 
 type Mutation {
@@ -81,9 +100,12 @@ type Mutation {
     addProject(name:String!,description:String!):Project
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
     updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
+    createConversation(receiverId:String!): Conversation
+    createMessage(message:String! , conversationId:ID): Message
 }
 type Subscription {
   notificationCreated: Notification
+  messageCreated : Message
 
 }
 `;

@@ -10,16 +10,11 @@ import {
 const addProject = async (_, { name, description }, context) => {
   let connection;
   try {
-    console.log(context?.uuid);
     connection = await pool.getConnection();
     const idProject = uuidv4();
     await connection.beginTransaction();
 
-    const [result] = await connection.query(INSERT_PROJECT, [
-      idProject,
-      name,
-      description,
-    ]);
+    await connection.query(INSERT_PROJECT, [idProject, name, description]);
 
     const idCreated = idProject;
 

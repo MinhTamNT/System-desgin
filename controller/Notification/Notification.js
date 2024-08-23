@@ -34,7 +34,6 @@ const createNotification = async ({
       type,
     ]);
 
-    console.log(result);
     await connection.commit();
 
     pubsub.publish("NOTIFICATION_CREATED", {
@@ -75,12 +74,10 @@ const getNotificationsByUserId = async (parent, args, context) => {
     const [result] = await connection.query(GET_NOTIFY_BY_USERID, [
       context?.uuid,
     ]);
-    console.log(result);
     const notifications = result.map((notification) => ({
       ...notification,
       is_read: Boolean(notification.is_read),
     }));
-    console.log(notifications);
     return notifications;
   } catch (error) {
     if (connection) await connection.rollback();

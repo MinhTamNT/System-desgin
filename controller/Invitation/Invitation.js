@@ -16,7 +16,6 @@ const InivitationUser = async (
   context
 ) => {
   let connection;
-  console.log("context", context.uuid);
   try {
     if (!context?.uuid || !email_content || !projectId || !userInvited) {
       throw new Error("Missing required parameters");
@@ -65,7 +64,6 @@ const InivitationUser = async (
       `You have been invited to join the project ${resultProject[0].name}`
     );
 
-    console.log(result);
     return result[0];
   } catch (error) {
     if (connection) await connection.rollback();
@@ -94,13 +92,10 @@ const updateInivitation = async (
     const [getInivite] = await connection.query(GET_INIVITATION_BY_ID, [
       invitation_idInvitation,
     ]);
-    console.log(invitation_idInvitation);
-    console.log(getInivite);
     const [userId] = await connection.query(GET_USER_BY_ID, [
       getInivite[0].User_idUser_requested,
     ]);
 
-    console.log(userId);
     if (status === "ACCEPTED") {
       await connection.query(INSERT_USER_PROJECT, [
         getInivite[0].User_idUser_invited,
