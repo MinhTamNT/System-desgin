@@ -61,9 +61,7 @@ export const resolvers = {
 
   Message: {
     sender: async (parent) => {
-      console.log("parent.sender", parent?.sender);
       const sender = await User.findOne({ uuid: parent.sender });
-
       return sender;
     },
   },
