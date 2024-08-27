@@ -7,8 +7,8 @@ JOIN designdb.invitation AS i
 ON n.invitation_idInvitation = i.idInvitation
 SET
   status = ? ,
-  n.is_read = 1 ,
-  WHERE i.idInvitation = ?;
+  n.is_read = 1 
+WHERE i.idInvitation = ?
 `;
 
 export const GET_INIVITATION_BY_ID = `

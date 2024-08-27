@@ -16,6 +16,16 @@ async function verifyGoogleToken(token) {
   }
 }
 
+async function refreshAccessToken(refreshToken) {
+  try {
+    const newTokens = await client.refreshToken(refreshToken);
+    return newTokens.credentials.access_token;
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    throw new Error("Could not refresh access token");
+  }
+}
+
 async function Authority(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -26,7 +36,20 @@ async function Authority(req, res, next) {
     res.locals.uuid = user?.sub;
     next();
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    if (error.message === "Invalid token" && req.cookies.refreshToken) {
+      try {
+        token = await refreshAccessToken(req.cookies.refreshToken);
+        req.headers["authorization"] = `Bearer ${token}`;
+        const user = await verifyGoogleToken(token);
+        req.user = user;
+        res.locals.uuid = user?.sub;
+        next();
+      } catch (refreshError) {
+        res.status(401).json({ error: "Invalid token and could not refresh" });
+      }
+    } else {
+      res.status(401).json({ error: "Invalid token" });
+    }
   }
 }
 
