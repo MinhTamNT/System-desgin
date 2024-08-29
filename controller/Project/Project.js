@@ -1,11 +1,13 @@
-import { pool } from "../../config/mysqlConfig.js";
 import { v4 as uuidv4 } from "uuid";
+import { pool } from "../../config/mysqlConfig.js";
 import {
-  INSERT_PROJECT,
-  INSERT_USER_PROJECT,
+  DELETE_PROJECT_BY_ID,
   GET_PROJECT_BY_ID,
   GET_PROJECT_TEAM,
+  INSERT_PROJECT,
+  INSERT_USER_PROJECT,
 } from "../../Query/project.js";
+import { liveblocks } from "../../server.mjs";
 
 const addProject = async (_, { name, description }, context) => {
   let connection;
@@ -75,4 +77,39 @@ const getProjectTeams = async (parent, args, context) => {
   }
 };
 
-export { addProject, getUserProjects, getProjectTeams };
+const deletedProject = async (_, { projectId }, context) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(DELETE_PROJECT_BY_ID, [
+      projectId,
+      context?.uuid,
+    ]);
+
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return {
+        message:
+          "Project not found or you are not authorized to delete this project.",
+      };
+    }
+    await connection.commit();
+
+    await liveblocks.deleteRoom(projectId);
+
+    return { message: "Project deleted successfully." };
+  } catch (error) {
+    console.error("Error deleting project:", error);
+
+    if (connection) await connection.rollback();
+
+    return { message: "Error deleting project." };
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+export { addProject, deletedProject, getProjectTeams, getUserProjects };

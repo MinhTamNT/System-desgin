@@ -95,6 +95,10 @@ type Query {
   getMessageConversationId(conversationId : String): [Message]
 }
 
+type News {
+  message:String
+}
+
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! , email:String!): User
     addProject(name:String!,description:String!):Project
@@ -102,6 +106,7 @@ type Mutation {
     updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
     createConversation(receiverId:String!): Conversation
     createMessage(message:String! , conversationId:ID): Message
+    deletedProjectId(projectId:String) : News
 }
 type Subscription {
   notificationCreated: Notification

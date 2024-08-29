@@ -19,7 +19,7 @@ const httpServer = http.createServer(app);
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 const PORT = process.env.PORT || 4000;
 
-const liveblocks = new Liveblocks({
+export const liveblocks = new Liveblocks({
   secret: process.env.API_KEY_LIVE,
 });
 

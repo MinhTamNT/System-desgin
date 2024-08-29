@@ -6,6 +6,7 @@ import {
 import { getNotificationsByUserId } from "../controller/Notification/Notification.js";
 import {
   addProject,
+  deletedProject,
   getProjectTeams,
   getUserProjects,
 } from "../controller/Project/Project.js";
@@ -73,6 +74,7 @@ export const resolvers = {
     updateInivitation: updateInivitation,
     createConversation: createConversation,
     createMessage: createMessage,
+    deletedProjectId: deletedProject,
   },
   Subscription: {
     notificationCreated: {
