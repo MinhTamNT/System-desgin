@@ -42,7 +42,8 @@ const addProject = async (_, { name, description }, context) => {
   }
 };
 
-const getUserProjects = async (_, __, context) => {
+const getUserProjects = async (parent, args, context) => {
+  console.log(context?.uuid);
   let connection;
   try {
     connection = await pool.getConnection();
@@ -50,6 +51,7 @@ const getUserProjects = async (_, __, context) => {
     const [projects] = await connection.query(GET_PROJECT_BY_ID, [
       context?.uuid,
     ]);
+    console.log(projects);
     return projects.map((project) => ({
       ...project,
       is_host_user: Boolean(project.is_host_user),

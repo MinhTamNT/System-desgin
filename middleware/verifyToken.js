@@ -36,7 +36,7 @@ async function Authority(req, res, next) {
     res.locals.uuid = user?.sub;
     next();
   } catch (error) {
-    if (error.message === "Invalid token") {
+    if (error) {
       try {
         token = await refreshAccessToken(req.cookies.refreshToken);
         req.headers["authorization"] = `Bearer ${token}`;
