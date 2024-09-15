@@ -14,6 +14,11 @@ import { configMySql } from "./config/mysqlConfig.js";
 import { Authority } from "./middleware/verifyToken.js";
 import { resolvers } from "./resolvers/resolvers.js";
 import { typeDefs } from "./schema/schema.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import adminRoute from "./controllerAdmin/routeApi.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 const httpServer = http.createServer(app);
 const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -22,6 +27,7 @@ const PORT = process.env.PORT || 4000;
 export const liveblocks = new Liveblocks({
   secret: process.env.API_KEY_LIVE,
 });
+const admin = adminRoute;
 
 const wsServer = new WebSocketServer({
   server: httpServer,
@@ -47,7 +53,10 @@ const server = new ApolloServer({
 app.use(cors());
 app.use(bodyParser.json());
 app.use(Authority);
-
+app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/admin", admin);
+app.use("/v1", adminRoute);
 async function startApolloServer() {
   await server.start();
   app.use(
@@ -74,14 +83,9 @@ mongoose
   .then(() => console.log("Connection to database successful"))
   .catch((error) => console.error("Error connecting to database:", error));
 
-const activeUsers = await liveblocks.getActiveUsers(
-  "0130d206-6491-4596-917f-b61b566dd8ff"
-);
-const room = await liveblocks.getRoom("0130d206-6491-4596-917f-b61b566dd8ff");
-console.log(room);
-
 startApolloServer().then(() => {
   httpServer.listen({ port: PORT }, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+    console.log(`🛠 Admin Page available at http://localhost:${PORT}/admin`);
   });
 });

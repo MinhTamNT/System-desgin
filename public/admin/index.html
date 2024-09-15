@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .sidebar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background-color: #4a5568;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex">
+    <aside
+      class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
+    >
+      <h2 class="text-2xl font-bold text-center mb-8 text-blue-400">
+        Admin Panel
+      </h2>
+      <nav class="flex-grow">
+        <ul>
+          <li class="mb-6">
+            <a
+              href="#"
+              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              >Dashboard</a
+            >
+          </li>
+          <li class="mb-6">
+            <a
+              href="./user.html"
+              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              >User Management</a
+            >
+          </li>
+          <li class="mb-6">
+            <a
+              href="#"
+              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              >Settings</a
+            >
+          </li>
+          <li class="mb-6">
+            <a
+              href="#"
+              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              >Logout</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <p class="text-sm text-gray-400 text-center">
+          &copy; 2024 Company Pixel App
+        </p>
+      </div>
+    </aside>
+
+    <div class="flex-1 ml-64 p-8">
+      <header
+        class="flex items-center justify-between py-5 bg-white shadow-lg rounded-md px-6 mb-8"
+      >
+        <h1 class="text-3xl font-semibold text-gray-800">Dashboard</h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-gray-600 text-lg">Welcome, Admin</span>
+        </div>
+      </header>
+
+      <main>
+        <div class="bg-white p-8 rounded-lg shadow-lg mb-8">
+          <h2 class="text-2xl font-semibold mb-4 text-gray-700">Overview</h2>
+          <p class="text-gray-600">
+            This is where your dashboard or other content will be displayed.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-2 text-gray-800">
+              Total Users
+            </h3>
+            <p class="text-3xl font-bold text-gray-900">1,234</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

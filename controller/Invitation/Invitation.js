@@ -103,6 +103,7 @@ const updateInivitation = async (
         "ROLE_WRITE",
         false,
       ]);
+
       await createNotification({
         message: `${userId[0].name} just ${status} your project `,
         userRequest: context?.uuid,
