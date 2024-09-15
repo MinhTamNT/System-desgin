@@ -26,6 +26,7 @@
     "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "^5.16.0",
     "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
     "mogoose": "^0.0.1-security",
     "mongodb": "^6.8.0",
     "mongoose": "^8.4.5",

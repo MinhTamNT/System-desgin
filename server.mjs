@@ -17,6 +17,7 @@ import { typeDefs } from "./schema/schema.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import adminRoute from "./controllerAdmin/routeApi.js";
+import { authenticateToken } from "./middleware/adminMiddleware.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -56,7 +57,7 @@ app.use(Authority);
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/admin", admin);
-app.use("/v1", adminRoute);
+app.use("/v1", adminRoute, authenticateToken);
 async function startApolloServer() {
   await server.start();
   app.use(

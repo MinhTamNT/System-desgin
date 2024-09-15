@@ -13,4 +13,8 @@ route.get("/users", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "user.html"));
 });
 
+route.get("/admin/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin", "login.html"));
+});
+
 export default route;

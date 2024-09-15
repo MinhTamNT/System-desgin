@@ -38,13 +38,7 @@
               >User Management</a
             >
           </li>
-          <li class="mb-6">
-            <a
-              href="#"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
-              >Settings</a
-            >
-          </li>
+
           <li class="mb-6">
             <a
               href="#"
@@ -89,5 +83,21 @@
         </div>
       </main>
     </div>
+
+    <script>
+      window.onload = function () {
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        const token = getCookie("token");
+
+        if (!token) {
+          window.location.href = "/login"; // Redirect to login page if token is not found
+        }
+      };
+    </script>
   </body>
 </html>
