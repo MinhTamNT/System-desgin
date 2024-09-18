@@ -17,4 +17,12 @@ route.get("/admin/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin", "login.html"));
 });
 
+route.get("/admin/project", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin", "project.html"));
+});
+
+route.get("/admin/project/project-details", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin", "project-detail.html"));
+});
+
 export default route;

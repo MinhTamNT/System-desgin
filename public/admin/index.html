@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       .sidebar::-webkit-scrollbar {
         width: 8px;
@@ -16,6 +17,7 @@
     </style>
   </head>
   <body class="bg-gray-100 min-h-screen flex">
+    <!-- Sidebar -->
     <aside
       class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
     >
@@ -38,7 +40,13 @@
               >User Management</a
             >
           </li>
-
+          <li class="mb-6">
+            <a
+              href="./project.html"
+              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              >User Project</a
+            >
+          </li>
           <li class="mb-6">
             <a
               href="#"
@@ -55,6 +63,7 @@
       </div>
     </aside>
 
+    <!-- Main content -->
     <div class="flex-1 ml-64 p-8">
       <header
         class="flex items-center justify-between py-5 bg-white shadow-lg rounded-md px-6 mb-8"
@@ -66,11 +75,13 @@
       </header>
 
       <main>
-        <div class="bg-white p-8 rounded-lg shadow-lg mb-8">
-          <h2 class="text-2xl font-semibold mb-4 text-gray-700">Overview</h2>
-          <p class="text-gray-600">
-            This is where your dashboard or other content will be displayed.
-          </p>
+        <!-- Filter -->
+        <div class="mb-4">
+          <label for="filter" class="text-gray-700">Filter Users By:</label>
+          <select id="filter" class="ml-2 p-2 bg-white border rounded">
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -78,26 +89,92 @@
             <h3 class="text-xl font-semibold mb-2 text-gray-800">
               Total Users
             </h3>
-            <p class="text-3xl font-bold text-gray-900">1,234</p>
+            <p id="totalUsers" class="text-3xl font-bold text-gray-900">0</p>
+            <!-- Chart canvas for Total Users -->
+            <canvas id="totalUsersChart" width="400" height="400"></canvas>
           </div>
         </div>
       </main>
     </div>
 
     <script>
-      window.onload = function () {
-        function getCookie(name) {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop().split(";").shift();
+      document.addEventListener("DOMContentLoaded", () => {
+        const ctx = document.getElementById("totalUsersChart").getContext("2d");
+        const totalUsersChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: [], // X-axis labels
+            datasets: [
+              {
+                label: "Total Users",
+                data: [], // User data will be populated dynamically
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: { beginAtZero: true },
+            },
+          },
+        });
+
+        // Function to update chart and user count
+        function updateChart(type) {
+          fetch(`/v1/api/users/filter?type=${type}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+
+              if (type === "month") {
+                const months = [
+                  "January",
+                  "February",
+                  "March",
+                  "April",
+                  "May",
+                  "June",
+                  "July",
+                  "August",
+                  "September",
+                  "October",
+                  "November",
+                  "December",
+                ];
+                const userCounts = new Array(12).fill(0);
+
+                data.forEach((entry) => {
+                  userCounts[entry.month - 1] = entry.user_count;
+                });
+
+                // Update chart labels and data
+                totalUsersChart.data.labels = months;
+                totalUsersChart.data.datasets[0].data = userCounts;
+              } else {
+                // Assuming type "week" returns total users only, update accordingly
+                totalUsersChart.data.labels = ["This Week"];
+                totalUsersChart.data.datasets[0].data = [data.length];
+              }
+
+              totalUsersChart.update();
+              document.getElementById("totalUsers").textContent = data.length;
+            })
+            .catch((error) => console.error("Error fetching users:", error));
         }
 
-        const token = getCookie("token");
+        // Event listener for filter change
+        document.getElementById("filter").addEventListener("change", (e) => {
+          const filterType = e.target.value;
+          updateChart(filterType);
+        });
 
-        if (!token) {
-          window.location.href = "/login"; // Redirect to login page if token is not found
-        }
-      };
+        // Initial load for the current week
+        updateChart("week");
+      });
     </script>
   </body>
 </html>

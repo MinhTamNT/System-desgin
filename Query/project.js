@@ -9,7 +9,7 @@ export const INSERT_USER_PROJECT = `
 `;
 
 export const GET_PROJECT_BY_ID = `
-select p.idProject ,name ,description, is_host_user 
+select p.idProject ,name ,description, is_host_user , own.access
 from designdb.project as p join designdb.user_has_project as own on p.idProject = own.Project_idProject WHERE own.user_idUser = ?
 `;
 

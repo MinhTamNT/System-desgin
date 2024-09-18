@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      /* Custom Styles */
+      .modal-enter {
+        opacity: 0;
+      }
+      .modal-enter-active {
+        opacity: 1;
+        transition: opacity 300ms;
+      }
+      .modal-exit {
+        opacity: 1;
+      }
+      .modal-exit-active {
+        opacity: 0;
+        transition: opacity 300ms;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex">
+    <!-- Sidebar -->
+    <aside
+      class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
+    >
+      <h2 class="text-2xl font-bold text-center mb-8 text-blue-400">
+        Admin Panel
+      </h2>
+      <nav class="flex-grow">
+        <ul>
+          <li class="mb-4">
+            <a
+              href="#"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Dashboard</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="#"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >User Management</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="./projects.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Projects</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="#"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Logout</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <p class="text-sm text-gray-400 text-center">
+          &copy; 2024 Company Pixel App
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 ml-64 p-8">
+      <header
+        class="flex items-center justify-between py-5 bg-white shadow-md rounded-lg px-6 mb-8"
+      >
+        <h1 class="text-3xl font-semibold text-gray-800">Projects List</h1>
+      </header>
+
+      <main>
+        <div class="bg-white p-8 rounded-lg shadow-md space-y-6">
+          <h2 class="text-2xl font-semibold mb-4 text-gray-700">
+            Project List
+          </h2>
+          <div id="projects-list" class="space-y-4">
+            <!-- Projects will be loaded here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal -->
+    <div
+      id="projectDetailModal"
+      class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-lg shadow-lg max-w-lg w-full">
+        <div
+          class="bg-gray-800 text-white p-4 rounded-t-lg flex justify-between items-center"
+        >
+          <h5 id="projectDetailModalLabel" class="text-lg font-semibold">
+            Project Details
+          </h5>
+          <button
+            class="text-white hover:text-gray-300"
+            onclick="toggleModal()"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="p-4">
+          <div id="project-detail" class="mb-4"></div>
+          <canvas id="projectChart" class="mt-4 w-full h-64"></canvas>
+        </div>
+        <div class="bg-gray-100 p-4 rounded-b-lg flex justify-end">
+          <button
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onclick="toggleModal()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleModal() {
+        const modal = document.getElementById("projectDetailModal");
+        modal.classList.toggle("hidden");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        async function loadProjects() {
+          try {
+            const response = await axios.get("/v1/api/projects");
+            const projects = response.data;
+
+            const projectsList = document.getElementById("projects-list");
+            projectsList.innerHTML = ""; // Clear previous content
+
+            projects.forEach((project) => {
+              const projectDiv = document.createElement("div");
+              projectDiv.className =
+                "bg-white p-6 rounded-lg shadow-lg hover:bg-gray-50 transition duration-300 border border-gray-200";
+
+              const viewDetailsButton = document.createElement("button");
+              viewDetailsButton.type = "button";
+              viewDetailsButton.className =
+                "text-blue-500 hover:underline mt-2";
+              viewDetailsButton.textContent = "View Details";
+              viewDetailsButton.addEventListener("click", () => {
+                loadProjectDetail(project.idProject);
+              });
+
+              projectDiv.innerHTML = `
+                            <h2 class="text-xl font-semibold text-gray-800">${project.name}</h2>
+                            <p class="text-gray-600">ID: ${project.idProject}</p>
+                        `;
+              projectDiv.appendChild(viewDetailsButton);
+
+              projectsList.appendChild(projectDiv);
+            });
+          } catch (error) {
+            console.error("Error loading projects:", error);
+          }
+        }
+
+        async function loadProjectDetail(projectId) {
+          try {
+            const response = await axios.get(`/v1/api/projects/${projectId}`);
+            const project = response.data;
+
+            const projectDetail = document.getElementById("project-detail");
+            projectDetail.innerHTML = `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${
+                          project.name
+                        }</h3>
+                        <p class="text-gray-600"><strong>ID:</strong> ${
+                          project.idProject
+                        }</p>
+                        <p class="text-gray-600"><strong>Description:</strong> ${
+                          project.description
+                        }</p>
+                        <p class="text-gray-600"><strong>Created At:</strong> ${new Date(
+                          project.createdAt
+                        ).toLocaleDateString()}</p>
+                    `;
+
+            // Fetch chart data
+            const chartResponse = await axios.get(
+              `/v1/api/storage-size/${projectId}`
+            );
+            const chartData = chartResponse.data;
+
+            // Update Chart.js
+            const ctx = document
+              .getElementById("projectChart")
+              .getContext("2d");
+            new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: chartData.labels || ["KB", "MB", "GB", "TB"],
+                datasets: [
+                  {
+                    label: "Project Metrics",
+                    data: chartData.totalSize || [0, 0, 0, 0],
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderWidth: 2,
+                    fill: true,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: "top",
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        return `${context.dataset.label}: ${context.parsed.y}`;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  x: { beginAtZero: true },
+                  y: { beginAtZero: true },
+                },
+              },
+            });
+
+            toggleModal(); // Show the modal when data is loaded
+          } catch (error) {
+            console.error("Error loading project details:", error);
+          }
+        }
+
+        loadProjects(); // Load all projects on page load
+      });
+    </script>
+  </body>
+</html>
