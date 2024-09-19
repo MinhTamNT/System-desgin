@@ -3,6 +3,7 @@ import { deleteUserById, getAllUser } from "./adminApi.js";
 import "dotenv/config";
 import { pool } from "../config/mysqlConfig.js";
 import jwt from "jsonwebtoken";
+import User from "../model/User.js";
 
 //chart data of the liveblock
 
@@ -59,6 +60,7 @@ adminRoute.delete("/api/users/:id", async (req, res) => {
   try {
     const result = await deleteUserById(id);
     if (result.affectedRows > 0) {
+      await User.findByIdAndDelete(id);
       res.status(200).json({ message: "User deleted successfully" });
     } else {
       res.status(404).json({ message: "User not found" });
