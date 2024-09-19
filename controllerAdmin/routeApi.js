@@ -178,7 +178,6 @@ adminRoute.get("/api/storage-size/:projectId", async (req, res) => {
     }
 
     const data = await fetchStorageData(projectId);
-    console.log(data.data.canvasObjects.data);
     if (data && data.data.canvasObjects.data) {
       const totalSizeBytes = getTotalSizeInBytes(data.data.canvasObjects.data);
       res.json({ totalSize: bytesToSize(totalSizeBytes) });
@@ -187,6 +186,26 @@ adminRoute.get("/api/storage-size/:projectId", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: "Error fetching storage data" });
+  }
+});
+
+adminRoute.delete("/api/projects/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await pool.query(
+      "DELETE FROM project WHERE idProject = ?",
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Project deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Project not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    res.status(500).json({ message: "Error deleting project" });
   }
 });
 
