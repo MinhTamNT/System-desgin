@@ -51,3 +51,22 @@ JOIN project p ON uhp.project_idProject = p.idProject
 WHERE uhp.user_idUser = ?
 ORDER BY uhp.lastAccessed DESC
 LIMIT 5;`;
+
+export const GET_MEMBER_IN_PROJECT = `
+SELECT 
+    u.idUser AS idUser,
+    p.idProject AS project_idProject,
+    pm.access,
+    pm.is_host_user,
+    pm.lastAccessed,
+    pm.accessCount,
+    p.name,
+    u.name AS name,
+    u.profilePicture AS profilePicture  -- Added comma here
+FROM
+    designdb.user_has_project AS pm
+    INNER JOIN designdb.user u ON pm.user_idUser = u.idUser
+    INNER JOIN designdb.project p ON pm.project_idProject = p.idProject
+WHERE
+    p.idProject = ?
+`;

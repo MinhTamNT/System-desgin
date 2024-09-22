@@ -84,6 +84,7 @@ type UserProjectAccess {
   lastAccessed: Date
   accessCount: Int
   projectName:String
+  User: [User]
 }
 
 type Notification {
@@ -105,6 +106,11 @@ type ActivityLog {
   User_idUser: String
 }
 
+type News {
+  message:String
+}
+
+
 type Query {
   getUserProjects: [Project]
   searchUserByName(searchText:String!):[User]
@@ -113,12 +119,9 @@ type Query {
   getConversation: [Conversation]
   getMessageConversationId(conversationId : String): [Message]
   getUserActivityLog: [ActivityLog] 
-   getRecentProjectsWithAccess: [UserProjectAccess]
+  getRecentProjectsWithAccess: [UserProjectAccess]
+  getMememberInProject (projectId: String) : [UserProjectAccess]
 
-}
-
-type News {
-  message:String
 }
 
 type Mutation {

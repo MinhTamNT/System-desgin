@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { pool } from "../../config/mysqlConfig.js";
 import {
   DELETE_PROJECT_BY_ID,
+  GET_MEMBER_IN_PROJECT,
   GET_PROJECT_BY_ID,
   GET_PROJECT_TEAM,
   GET_RECENT_PROJECT,
@@ -169,6 +170,36 @@ const getRecentProjectsWithAccess = async (parent, args, context) => {
   }
 };
 
+const getProjectMemember = async (parent, { projectId }, context) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const [res] = await pool.query(GET_MEMBER_IN_PROJECT, [projectId]);
+    const projects = res.map((row) => ({
+      ...row,
+      access: Boolean(row?.access),
+      is_host_user: row.is_host_user.toString() === "\x00" ? false : true , // Convert buffer to boolean
+      projectName: row.projectName,
+      User: [
+        {
+          idUser: row.idUser,
+          name: row.name,
+          profilePicture: row.profilePicture,
+        },
+      ],
+    }));
+    console.log(projects);
+    connection.commit();
+    return projects;
+  } catch (error) {
+    connection.rollback();
+    console.log(error);
+  } finally {
+    if (connection) connection.release;
+  }
+};
+
 export {
   addProject,
   deletedProject,
@@ -176,4 +207,5 @@ export {
   getUserProjects,
   updateUserProjectAccess,
   getRecentProjectsWithAccess,
+  getProjectMemember,
 };
