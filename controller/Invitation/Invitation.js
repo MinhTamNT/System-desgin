@@ -92,8 +92,9 @@ const updateInivitation = async (
     const [getInivite] = await connection.query(GET_INIVITATION_BY_ID, [
       invitation_idInvitation,
     ]);
+
     const [userId] = await connection.query(GET_USER_BY_ID, [
-      getInivite[0].User_idUser_requested,
+      getInivite[0].User_idUser_invited,
     ]);
 
     if (status === "ACCEPTED") {

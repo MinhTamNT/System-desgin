@@ -4,10 +4,13 @@ import {
   DELETE_PROJECT_BY_ID,
   GET_PROJECT_BY_ID,
   GET_PROJECT_TEAM,
+  GET_RECENT_PROJECT,
   INSERT_PROJECT,
   INSERT_USER_PROJECT,
+  USER_HAS_PROJECT,
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
+import { logActivity } from "../../helper/activity.js";
 
 const addProject = async (_, { name, description }, context) => {
   let connection;
@@ -28,7 +31,13 @@ const addProject = async (_, { name, description }, context) => {
     ]);
 
     await connection.commit();
-
+    await logActivity(
+      "CREATE_PROJECT",
+      `Created project: ${name}`,
+      idCreated,
+      context?.uuid
+    );
+    // await liveblocks.createRoom(idCreated);
     return {
       idProject: idCreated,
       name,
@@ -114,4 +123,57 @@ const deletedProject = async (_, { projectId }, context) => {
   }
 };
 
-export { addProject, deletedProject, getProjectTeams, getUserProjects };
+const updateUserProjectAccess = async (parent, { projectId }, context) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const [res] = await pool.query(USER_HAS_PROJECT, [
+      context?.uuid,
+      projectId,
+    ]);
+    connection.commit();
+    return res;
+  } catch (error) {
+    connection.rollback();
+    console.log(error);
+  } finally {
+    if (connection) connection.release;
+  }
+};
+
+const getRecentProjectsWithAccess = async (parent, args, context) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [res] = await connection.query(GET_RECENT_PROJECT, [context?.uuid]);
+
+    const projects = res.map((row) => ({
+      ...row,
+      access: Boolean(row?.access),
+      is_host_user: Boolean(row?.is_host_user),
+      projectName: row.projectName,
+    }));
+
+    console.log(projects);
+
+    return projects;
+  } catch (error) {
+    if (connection) await connection.rollback(); // rollback nếu có lỗi
+    console.log(error);
+    throw new Error("Error fetching recent projects");
+  } finally {
+    if (connection) connection.release(); // Gọi phương thức release
+  }
+};
+
+export {
+  addProject,
+  deletedProject,
+  getProjectTeams,
+  getUserProjects,
+  updateUserProjectAccess,
+  getRecentProjectsWithAccess,
+};

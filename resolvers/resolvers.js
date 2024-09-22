@@ -8,7 +8,9 @@ import {
   addProject,
   deletedProject,
   getProjectTeams,
+  getRecentProjectsWithAccess,
   getUserProjects,
+  updateUserProjectAccess,
 } from "../controller/Project/Project.js";
 import { addNewUser, SearchUserByName } from "../controller/User/User.js";
 import { pool } from "../config/mysqlConfig.js";
@@ -22,6 +24,7 @@ import {
   createMessage,
   getMessageConversationId,
 } from "../controller/Message/Message.js";
+import { getActivatyUser } from "../controller/Activaty/Activaty.js";
 export const pubsub = new PubSub();
 const NOTIFICATION_CREATED = "NOTIFICATION_CREATED";
 const MESSAGE_CREATED = "MESSAGE_CREATED";
@@ -33,6 +36,8 @@ export const resolvers = {
     getProjectTeams: getProjectTeams,
     getConversation: getConversation,
     getMessageConversationId: getMessageConversationId,
+    getUserActivityLog: getActivatyUser,
+    getRecentProjectsWithAccess: getRecentProjectsWithAccess,
   },
   Notification: {
     userRequest: async (parent) => {
@@ -75,6 +80,7 @@ export const resolvers = {
     createConversation: createConversation,
     createMessage: createMessage,
     deletedProjectId: deletedProject,
+    updateProjectAcces: updateUserProjectAccess,
   },
   Subscription: {
     notificationCreated: {

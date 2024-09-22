@@ -8,8 +8,10 @@ export const CHECK_USER_EXISTS = `
 `;
 
 export const SEARCH_USER_NAME = `
- SELECT * FROM user
-      WHERE name LIKE ?
+  SELECT u.*
+  FROM user as u
+  JOIN role as r ON u.Role_idRole = r.idRole
+  WHERE u.name LIKE ? AND r.name = "ROLE_USER"
 `;
 
 export const GET_USER_BY_ID = `

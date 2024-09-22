@@ -22,7 +22,7 @@ const addNewUser = async (
     // Check if the user already exists in MongoDB
     const existingUser = await User.findOne({ uuid: idUser });
     if (!existingUser) {
-        const newUser = new User({
+      const newUser = new User({
         name,
         profilePicture,
         uuid: idUser,

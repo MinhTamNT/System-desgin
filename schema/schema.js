@@ -76,6 +76,16 @@ type Inivitation {
   User_idUser_invited: String!
 }
 
+type UserProjectAccess {
+  user_idUser: String
+  project_idProject: String
+  access: Boolean
+  is_host_user: Boolean
+  lastAccessed: Date
+  accessCount: Int
+  projectName:String
+}
+
 type Notification {
   idNotification: String!,
   type : TypeNotify
@@ -86,6 +96,15 @@ type Notification {
   userRequest: [User]
 }
 
+type ActivityLog {
+  idactivityLogSchema: String!
+  action: String!
+  details: String
+  createdAt: Date
+  Project_idProject: String
+  User_idUser: String
+}
+
 type Query {
   getUserProjects: [Project]
   searchUserByName(searchText:String!):[User]
@@ -93,6 +112,9 @@ type Query {
   getProjectTeams : [Project]
   getConversation: [Conversation]
   getMessageConversationId(conversationId : String): [Message]
+  getUserActivityLog: [ActivityLog] 
+   getRecentProjectsWithAccess: [UserProjectAccess]
+
 }
 
 type News {
@@ -107,6 +129,8 @@ type Mutation {
     createConversation(receiverId:String!): Conversation
     createMessage(message:String! , conversationId:ID): Message
     deletedProjectId(projectId:String) : News
+    updateProjectAcces( projectId: String!): UserProjectAccess
+
 }
 type Subscription {
   notificationCreated: Notification

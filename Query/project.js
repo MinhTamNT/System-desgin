@@ -32,3 +32,22 @@ WHERE p.idProject = ?
   AND uhp.User_idUser = ? 
   AND uhp.is_host_user = 1;;
 `;
+
+export const USER_HAS_PROJECT = `
+UPDATE user_has_project
+SET
+    lastAccessed = NOW(),
+    accessCount = accessCount + 1
+WHERE
+    user_idUser = ? AND
+    project_idProject = ?
+
+`;
+
+export const GET_RECENT_PROJECT = `
+SELECT uhp.user_idUser, uhp.project_idProject, p.name AS projectName, uhp.access, uhp.is_host_user, uhp.lastAccessed, uhp.accessCount
+FROM user_has_project uhp
+JOIN project p ON uhp.project_idProject = p.idProject
+WHERE uhp.user_idUser = ?
+ORDER BY uhp.lastAccessed DESC
+LIMIT 5;`;
