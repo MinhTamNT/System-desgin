@@ -70,3 +70,8 @@ FROM
 WHERE
     p.idProject = ?
 `;
+
+export const UPDATE_USER_ROLE_IN_PROJECT = `
+    UPDATE user_has_project
+    SET access = ? WHERE user_idUser = ? AND project_idProject = ?
+`;

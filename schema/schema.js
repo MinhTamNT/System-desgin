@@ -133,6 +133,8 @@ type Mutation {
     createMessage(message:String! , conversationId:ID): Message
     deletedProjectId(projectId:String) : News
     updateProjectAcces( projectId: String!): UserProjectAccess
+    updateRoleProject( projectId: String! , userId: String! , role: String!): UserProjectAccess
+    
 
 }
 type Subscription {

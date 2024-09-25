@@ -8,6 +8,7 @@ import {
   GET_RECENT_PROJECT,
   INSERT_PROJECT,
   INSERT_USER_PROJECT,
+  UPDATE_USER_ROLE_IN_PROJECT,
   USER_HAS_PROJECT,
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
@@ -64,7 +65,7 @@ const getUserProjects = async (parent, args, context) => {
     console.log(projects);
     return projects.map((project) => ({
       ...project,
-      is_host_user: Boolean(project.is_host_user),
+      is_host_user: project.is_host_user.toString() === "\x00" ? false : true,
     }));
   } catch (error) {
     throw new Error("Error fetching user projects: " + error.message);
@@ -154,7 +155,7 @@ const getRecentProjectsWithAccess = async (parent, args, context) => {
     const projects = res.map((row) => ({
       ...row,
       access: Boolean(row?.access),
-      is_host_user: Boolean(row?.is_host_user),
+      is_host_user: row.is_host_user.toString() === "\x00" ? false : true,
       projectName: row.projectName,
     }));
 
@@ -179,7 +180,7 @@ const getProjectMemember = async (parent, { projectId }, context) => {
     const projects = res.map((row) => ({
       ...row,
       access: Boolean(row?.access),
-      is_host_user: row.is_host_user.toString() === "\x00" ? false : true , // Convert buffer to boolean
+      is_host_user: row.is_host_user.toString() === "\x00" ? false : true,
       projectName: row.projectName,
       User: [
         {
@@ -200,6 +201,31 @@ const getProjectMemember = async (parent, { projectId }, context) => {
   }
 };
 
+const updateRoleProjects = async (
+  parent,
+  { projectId, role, userId },
+  context
+) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    console.log(projectId, role, userId);
+    const [res] = await connection.query(UPDATE_USER_ROLE_IN_PROJECT, [
+      role === "VIEWER" ? "ROLE_READ" : "ROLE_WRITE",
+      userId,
+      projectId,
+    ]);
+    connection.commit();
+    return res;
+  } catch (error) {
+    connection.rollback();
+    console.log(error);
+  } finally {
+    if (connection) connection.release;
+  }
+};
+
 export {
   addProject,
   deletedProject,
@@ -208,4 +234,5 @@ export {
   updateUserProjectAccess,
   getRecentProjectsWithAccess,
   getProjectMemember,
+  updateRoleProjects,
 };

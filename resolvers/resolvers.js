@@ -11,6 +11,7 @@ import {
   getProjectTeams,
   getRecentProjectsWithAccess,
   getUserProjects,
+  updateRoleProjects,
   updateUserProjectAccess,
 } from "../controller/Project/Project.js";
 import { addNewUser, SearchUserByName } from "../controller/User/User.js";
@@ -83,6 +84,7 @@ export const resolvers = {
     createMessage: createMessage,
     deletedProjectId: deletedProject,
     updateProjectAcces: updateUserProjectAccess,
+    updateRoleProject: updateRoleProjects,
   },
   Subscription: {
     notificationCreated: {
