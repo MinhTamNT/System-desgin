@@ -26,31 +26,38 @@
       </h2>
       <nav class="flex-grow">
         <ul>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./index.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >Dashboard</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./user.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >User Management</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./project.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
-              >User Project</a
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Projects</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
+            <a
+              href="./notification.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Notifications</a
+            >
+          </li>
+          <li class="mb-4">
             <a
               href="./login.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >Logout</a
             >
           </li>
@@ -84,97 +91,194 @@
           </select>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold mb-2 text-gray-800">
-              Total Users
-            </h3>
-            <p id="totalUsers" class="text-3xl font-bold text-gray-900">0</p>
-            <!-- Chart canvas for Total Users -->
-            <canvas id="totalUsersChart" width="400" height="400"></canvas>
+        <!-- Access Statistics -->
+        <div class="w-full max-w-4xl mb-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Access Statistics
+          </h2>
+          <div class="bg-white shadow-md rounded-lg p-4">
+            <canvas id="combinedChart"></canvas>
+          </div>
+        </div>
+
+        <div class="w-full max-w-4xl mb-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            User Access Statistics
+          </h2>
+          <div class="bg-white shadow-md rounded-lg p-4">
+            <canvas id="accessStatisticsChart"></canvas>
           </div>
         </div>
       </main>
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const ctx = document.getElementById("totalUsersChart").getContext("2d");
-        const totalUsersChart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: [], // X-axis labels
-            datasets: [
-              {
-                label: "Total Users",
-                data: [], // User data will be populated dynamically
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-              },
-            ],
-          },
-          options: {
-            scales: {
-              y: { beginAtZero: true },
+      // Combined Chart: Access by User Role and Project
+      const ctxCombined = document
+        .getElementById("combinedChart")
+        .getContext("2d");
+      const combinedChart = new Chart(ctxCombined, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "ROLE_READ",
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              borderColor: "rgba(75, 192, 192, 1)",
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              data: [],
+            },
+            {
+              label: "ROLE_WRITE",
+              backgroundColor: "rgba(255, 159, 64, 0.2)",
+              borderColor: "rgba(255, 159, 64, 1)",
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              data: [],
+            },
+            {
+              label: "Total Project Accesses",
+              backgroundColor: "rgba(153, 102, 255, 0.2)",
+              borderColor: "rgba(153, 102, 255, 1)",
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              data: [],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
             },
           },
-        });
-
-        // Function to update chart and user count
-        function updateChart(type) {
-          fetch(`/v1/api/users/filter?type=${type}`)
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-
-              if (type === "month") {
-                const months = [
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
-                ];
-                const userCounts = new Array(12).fill(0);
-
-                data.forEach((entry) => {
-                  userCounts[entry.month - 1] = entry.user_count;
-                });
-
-                // Update chart labels and data
-                totalUsersChart.data.labels = months;
-                totalUsersChart.data.datasets[0].data = userCounts;
-              } else {
-                // Assuming type "week" returns total users only, update accordingly
-                totalUsersChart.data.labels = ["This Week"];
-                totalUsersChart.data.datasets[0].data = [data.length];
-              }
-
-              totalUsersChart.update();
-              document.getElementById("totalUsers").textContent = data.length;
-            })
-            .catch((error) => console.error("Error fetching users:", error));
-        }
-
-        // Event listener for filter change
-        document.getElementById("filter").addEventListener("change", (e) => {
-          const filterType = e.target.value;
-          updateChart(filterType);
-        });
-
-        // Initial load for the current week
-        updateChart("week");
+          plugins: {
+            tooltip: {
+              mode: "index",
+              intersect: false,
+            },
+          },
+        },
       });
+
+      // Fetch and update combined chart with data from API
+      function updateCombinedChart() {
+        fetch("/v1/access-statistics")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+
+            const users = {};
+            const projects = {};
+
+            data.forEach((entry) => {
+              if (!users[entry.user_name]) {
+                users[entry.user_name] = { ROLE_READ: 0, ROLE_WRITE: 0 };
+              }
+              users[entry.user_name][entry.access_type]++;
+
+              if (!projects[entry.project_name]) {
+                projects[entry.project_name] = 0;
+              }
+              projects[entry.project_name] += entry.project_access_count;
+            });
+
+            // Prepare data for Chart
+            const userNames = Object.keys(users);
+            const roleReadCounts = userNames.map(
+              (user) => users[user].ROLE_READ
+            );
+            const roleWriteCounts = userNames.map(
+              (user) => users[user].ROLE_WRITE
+            );
+            const projectNames = Object.keys(projects);
+            const projectAccessCounts = projectNames.map(
+              (project) => projects[project]
+            );
+
+            // Combine labels for x-axis
+            const combinedLabels = [...userNames, ...projectNames];
+
+            // Update Chart data
+            combinedChart.data.labels = combinedLabels;
+            combinedChart.data.datasets[0].data = [
+              ...roleReadCounts,
+              ...Array(projectNames.length).fill(0),
+            ];
+            combinedChart.data.datasets[1].data = [
+              ...roleWriteCounts,
+              ...Array(projectNames.length).fill(0),
+            ];
+            combinedChart.data.datasets[2].data = [
+              ...Array(userNames.length).fill(0),
+              ...projectAccessCounts,
+            ];
+            combinedChart.update();
+          })
+          .catch((error) =>
+            console.error("Error fetching access statistics:", error)
+          );
+      }
+
+      // Call updateCombinedChart to load initial data
+      updateCombinedChart();
+
+      // User Access Statistics Chart
+      const ctxAccess = document
+        .getElementById("accessStatisticsChart")
+        .getContext("2d");
+      const accessStatisticsChart = new Chart(ctxAccess, {
+        type: "bar",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Total Access Count",
+              backgroundColor: "rgba(54, 162, 235, 0.5)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+              data: [],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+
+      // Fetch user access statistics
+      function fetchAccessStatistics() {
+        fetch("/v1/amount-access-statistics")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+
+            const userNames = data.map((entry) => entry.user_name);
+            const accessCounts = data.map((entry) => entry.total_access_count);
+
+            // Update chart data
+            accessStatisticsChart.data.labels = userNames;
+            accessStatisticsChart.data.datasets[0].data = accessCounts;
+            accessStatisticsChart.update();
+          })
+          .catch((error) =>
+            console.error("Error fetching access statistics:", error)
+          );
+      }
+
+      // Call function to fetch access statistics
+      fetchAccessStatistics();
     </script>
   </body>
 </html>

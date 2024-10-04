@@ -39,7 +39,9 @@ const addProject = async (_, { name, description }, context) => {
       idCreated,
       context?.uuid
     );
-    // await liveblocks.createRoom(idCreated);
+    await liveblocks.createRoom(idCreated, {
+      defaultAccesses: ["room:write"],
+    });
     return {
       idProject: idCreated,
       name,

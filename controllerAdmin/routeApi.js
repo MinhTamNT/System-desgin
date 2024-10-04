@@ -4,6 +4,8 @@ import "dotenv/config";
 import { pool } from "../config/mysqlConfig.js";
 import jwt from "jsonwebtoken";
 import User from "../model/User.js";
+import { get } from "mongoose";
+import { countAcceessCount, getAccessStatistics } from "./Statistics.js";
 
 //chart data of the liveblock
 
@@ -208,6 +210,68 @@ adminRoute.delete("/api/projects/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting project:", error);
     res.status(500).json({ message: "Error deleting project" });
+  }
+});
+
+adminRoute.get("/notifications", async (req, res) => {
+  const sql = "SELECT * FROM notification";
+  try {
+    const [results] = await pool.query(sql); // Use await here and destructure the result
+    res.json(results);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// Get a specific notification by ID
+adminRoute.get("/notifications/:id", async (req, res) => {
+  const sql = `
+    SELECT n.*, ur.name AS userRequestUsername, ut.name AS userTankerUsername
+    FROM notification n
+    JOIN user ur ON n.user_idUser_taker = ur.idUser
+    JOIN user ut ON n.user_idUser_requested = ut.idUser
+    WHERE n.idNotification = ?
+  `;
+
+  try {
+    const [results] = await pool.query(sql, [req.params.id]); // Use await and destructure
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+    res.json(results[0]);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+adminRoute.delete("/notifications/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    await pool.query("DELETE FROM notification WHERE idNotification = ?", [id]);
+    res.status(200).json({ message: "Notification deleted successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+adminRoute.route("/access-statistics").get(async (req, res) => {
+  try {
+    const [results] = await pool.query(getAccessStatistics);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Error fetching access statistics:", error);
+    res.status(500).json({ error: "Database query error" });
+  }
+});
+
+adminRoute.route("/amount-access-statistics").get(async (req, res) => {
+  try {
+    const [results] = await pool.query(countAcceessCount);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Error fetching access statistics:", error);
+    res.status(500).json({ error: "Database query error" });
   }
 });
 

@@ -6,7 +6,6 @@
     <title>Admin Panel - User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- Axios library for making HTTP requests -->
   </head>
   <body class="bg-gray-100 min-h-screen flex">
     <aside
@@ -17,31 +16,38 @@
       </h2>
       <nav class="flex-grow">
         <ul>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./index.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >Dashboard</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./user.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >User Management</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
             <a
               href="./project.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
-              >Project</a
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Projects</a
             >
           </li>
-          <li class="mb-6">
+          <li class="mb-4">
+            <a
+              href="./notification.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Notifications</a
+            >
+          </li>
+          <li class="mb-4">
             <a
               href="./login.html"
-              class="block py-3 px-4 hover:bg-gray-700 rounded transition duration-200"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >Logout</a
             >
           </li>
@@ -67,7 +73,6 @@
           <table class="min-w-full bg-white border border-gray-300 rounded-lg">
             <thead>
               <tr class="border-b border-gray-300">
-                <th class="py-3 px-6 text-left text-gray-600">ID</th>
                 <th class="py-3 px-6 text-left text-gray-600">Name</th>
                 <th class="py-3 px-6 text-left text-gray-600">Email</th>
                 <th class="py-3 px-6 text-left text-gray-600">Actions</th>
@@ -112,7 +117,7 @@
     </div>
 
     <script>
-      var userIdToDelete = null;
+      let userIdToDelete = null;
 
       async function fetchUsers() {
         try {
@@ -126,16 +131,13 @@
           users.forEach((user) => {
             const row = document.createElement("tr");
             row.classList.add("border-b", "border-gray-200");
-
             row.innerHTML = `
-              <td class="py-3 px-6">${user.idUser}</td>
               <td class="py-3 px-6">${user.name}</td>
               <td class="py-3 px-6">${user.email}</td>
               <td class="py-3 px-6">
                 <a href="#" class="text-red-500 hover:underline" onclick="showDeleteModal('${user.idUser}')">Delete</a>
               </td>
             `;
-
             userList.appendChild(row); // Add row to the table body
           });
         } catch (error) {
@@ -144,23 +146,38 @@
       }
 
       function showDeleteModal(userId) {
-        userIdToDelete = userId; // Set the user ID to delete
-        console.log("User ID to delete:", userIdToDelete);
+        userIdToDelete = userId;
         document.getElementById("confirmationModal").classList.remove("hidden"); // Show the modal
       }
 
       function hideDeleteModal() {
         document.getElementById("confirmationModal").classList.add("hidden"); // Hide the modal
-        userIdToDelete = null; // Clear the user ID
+        userIdToDelete = null;
       }
 
       async function deleteUser() {
         try {
-          await axios.delete(`/v1/api/users/${userIdToDelete}`); // Send delete request to API
-          fetchUsers(); // Refresh the user list after deletion
-          hideDeleteModal(); // Hide the modal
+          // Send delete request to the API using fetch
+          const response = await fetch(`/v1/api/users/${userIdToDelete}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+
+          const userRow = document.querySelector(
+            `tr[data-user-id="${userIdToDelete}"]`
+          );
+          if (userRow) {
+            userRow.remove();
+          }
+
+          hideDeleteModal();
+          fetchUsers();
         } catch (error) {
           console.error("Error deleting user:", error);
+          hideDeleteModal();
         }
       }
 
