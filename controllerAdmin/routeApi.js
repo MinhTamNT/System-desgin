@@ -216,14 +216,13 @@ adminRoute.delete("/api/projects/:id", async (req, res) => {
 adminRoute.get("/notifications", async (req, res) => {
   const sql = "SELECT * FROM notification";
   try {
-    const [results] = await pool.query(sql); // Use await here and destructure the result
+    const [results] = await pool.query(sql);
     res.json(results);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// Get a specific notification by ID
 adminRoute.get("/notifications/:id", async (req, res) => {
   const sql = `
     SELECT n.*, ur.name AS userRequestUsername, ut.name AS userTankerUsername
@@ -272,6 +271,47 @@ adminRoute.route("/amount-access-statistics").get(async (req, res) => {
   } catch (error) {
     console.error("Error fetching access statistics:", error);
     res.status(500).json({ error: "Database query error" });
+  }
+});
+
+adminRoute.get("/invitations", async (req, res) => {
+  const sql = "SELECT * FROM invitation";
+  try {
+    const [results] = await pool.query(sql); // Use await here and destructure the result
+    res.json(results);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+adminRoute.get("/invitations/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  const sql = `
+  SELECT n.*, ur.name AS userRequestUsername, ut.name AS userTankerUsername
+  FROM invitation n
+  JOIN user ur ON n.User_idUser_requested = ur.idUser   
+  JOIN user ut ON n.User_idUser_invited = ut.idUser       
+  WHERE n.idInvitation = ?;
+  `;
+  try {
+    const [results] = await pool.query(sql, [id]); // Use await here and destructure the result
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Invitation not found" });
+    }
+    res.json(results[0]);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+adminRoute.delete("/invitations/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM invitation WHERE idInvitation = ?", [id]);
+    res.status(200).json({ message: "Invitation deleted successfully" });
+  } catch (error) {
+    console.log(error);
   }
 });
 

@@ -3,7 +3,230 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Invitations List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      /* Custom Styles */
+      .modal-enter {
+        opacity: 0;
+      }
+      .modal-enter-active {
+        opacity: 1;
+        transition: opacity 300ms;
+      }
+      .modal-exit {
+        opacity: 1;
+      }
+      .modal-exit-active {
+        opacity: 0;
+        transition: opacity 300ms;
+      }
+    </style>
   </head>
-  <body></body>
+  <body class="bg-gray-100 min-h-screen flex">
+    <!-- Sidebar -->
+    <aside
+      class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
+    >
+      <h2 class="text-2xl font-bold text-center mb-8 text-blue-400">
+        Admin Panel
+      </h2>
+      <nav class="flex-grow">
+        <ul>
+          <li class="mb-4">
+            <a
+              href="./index.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Dashboard</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="./user.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >User Management</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="./project.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Projects</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="./invite.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Invitations</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
+              href="./login.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Logout</a
+            >
+          </li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <p class="text-sm text-gray-400 text-center">
+          &copy; 2024 Company Pixel App
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 ml-64 p-8">
+      <header
+        class="flex items-center justify-between py-5 bg-white shadow-md rounded-lg px-6 mb-8"
+      >
+        <h1 class="text-3xl font-semibold text-gray-800">Invitations List</h1>
+      </header>
+
+      <main>
+        <div class="bg-white p-8 rounded-lg shadow-md space-y-6">
+          <h2 class="text-2xl font-semibold mb-4 text-gray-700">Invitations</h2>
+          <div id="invitations-list" class="space-y-4">
+            <!-- Invitations will be loaded here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Invitation Detail Modal -->
+    <div
+      id="invitationDetailModal"
+      class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden"
+    >
+      <div
+        class="bg-white rounded-lg shadow-lg max-w-lg w-full transition-opacity duration-300"
+      >
+        <div
+          class="bg-gray-800 text-white p-4 rounded-t-lg flex justify-between items-center"
+        >
+          <h5 id="invitationDetailModalLabel" class="text-lg font-semibold">
+            Invitation Details
+          </h5>
+          <button
+            class="text-white hover:text-gray-300"
+            onclick="toggleDetailModal()"
+          >
+            ×
+          </button>
+        </div>
+        <div class="p-4">
+          <div id="invitation-detail" class="mb-4"></div>
+        </div>
+        <div class="bg-gray-100 p-4 rounded-b-lg flex justify-end">
+          <button
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onclick="toggleDetailModal()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleDetailModal() {
+        const modal = document.getElementById("invitationDetailModal");
+        modal.classList.toggle("hidden");
+        modal.classList.toggle("modal-enter");
+        modal.classList.toggle("modal-enter-active");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        async function loadInvitations() {
+          try {
+            const response = await axios.get("/v1/invitations");
+            const invitations = response.data;
+
+            const invitationsList = document.getElementById("invitations-list");
+            invitationsList.innerHTML = "";
+
+            invitations.forEach((invitation) => {
+              const invitationDiv = document.createElement("div");
+              invitationDiv.className =
+                "bg-white p-6 rounded-lg shadow-lg hover:bg-gray-50 transition duration-300 border border-gray-200";
+
+              const viewDetailsButton = document.createElement("button");
+              viewDetailsButton.type = "button";
+              viewDetailsButton.className =
+                "text-blue-500 hover:underline mt-2";
+              viewDetailsButton.textContent = "View Details";
+              viewDetailsButton.addEventListener("click", () => {
+                loadInvitationDetail(invitation.idInvitation);
+              });
+
+              // Create a delete button
+              const deleteButton = document.createElement("button");
+              deleteButton.type = "button";
+              deleteButton.className = "text-red-500 hover:underline ml-4";
+              deleteButton.textContent = "Delete";
+              deleteButton.addEventListener("click", () => {
+                deleteInvitation(invitation.idInvitation);
+              });
+
+              invitationDiv.innerHTML = `
+                <h2 class="text-xl font-semibold text-gray-800">${invitation.email_content}</h2>
+                <p class="text-gray-600">ID: ${invitation.idInvitation}</p>
+              `;
+              invitationDiv.appendChild(viewDetailsButton);
+              invitationDiv.appendChild(deleteButton);
+
+              invitationsList.appendChild(invitationDiv);
+            });
+          } catch (error) {
+            console.error("Error loading invitations:", error);
+          }
+        }
+
+        async function deleteInvitation(invitationId) {
+          try {
+            await axios.delete(`/v1/invitations/${invitationId}`);
+            loadInvitations();
+          } catch (error) {
+            console.error("Error deleting invitation:", error);
+          }
+        }
+
+        async function loadInvitationDetail(invitationId) {
+          try {
+            const response = await axios.get(`/v1/invitations/${invitationId}`);
+            const invitation = response.data;
+
+            const invitationDetail =
+              document.getElementById("invitation-detail");
+            invitationDetail.innerHTML = `
+              <h3 class="text-xl font-semibold text-gray-800 mb-2">${
+                invitation.email_content
+              }</h3>
+              <p class="text-gray-600"><strong>ID:</strong> ${
+                invitation.idInvitation
+              }</p>
+              <p class="text-gray-600"><strong>Message:</strong> ${
+                invitation.email_content
+              }</p>
+              <p class="text-gray-600"><strong>Invited By:</strong> ${
+                invitation.userRequestUsername
+              }</p>
+              <p class="text-gray-600"><strong>Created At:</strong> ${new Date(
+                invitation.createdAt
+              ).toLocaleDateString()}</p>
+            `;
+
+            toggleDetailModal();
+          } catch (error) {
+            console.error("Error loading invitation details:", error);
+          }
+        }
+
+        loadInvitations();
+      });
+    </script>
+  </body>
 </html>

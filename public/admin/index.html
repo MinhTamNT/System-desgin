@@ -17,7 +17,6 @@
     </style>
   </head>
   <body class="bg-gray-100 min-h-screen flex">
-    <!-- Sidebar -->
     <aside
       class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
     >
@@ -70,7 +69,6 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <div class="flex-1 ml-64 p-8">
       <header
         class="flex items-center justify-between py-5 bg-white shadow-lg rounded-md px-6 mb-8"
@@ -82,7 +80,6 @@
       </header>
 
       <main>
-        <!-- Filter -->
         <div class="mb-4">
           <label for="filter" class="text-gray-700">Filter Users By:</label>
           <select id="filter" class="ml-2 p-2 bg-white border rounded">
@@ -91,7 +88,6 @@
           </select>
         </div>
 
-        <!-- Access Statistics -->
         <div class="w-full max-w-4xl mb-8">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">
             Access Statistics
@@ -167,7 +163,6 @@
         },
       });
 
-      // Fetch and update combined chart with data from API
       function updateCombinedChart() {
         fetch("/v1/access-statistics")
           .then((response) => response.json())
@@ -226,10 +221,8 @@
           );
       }
 
-      // Call updateCombinedChart to load initial data
       updateCombinedChart();
 
-      // User Access Statistics Chart
       const ctxAccess = document
         .getElementById("accessStatisticsChart")
         .getContext("2d");
@@ -257,7 +250,6 @@
         },
       });
 
-      // Fetch user access statistics
       function fetchAccessStatistics() {
         fetch("/v1/amount-access-statistics")
           .then((response) => response.json())
@@ -267,7 +259,6 @@
             const userNames = data.map((entry) => entry.user_name);
             const accessCounts = data.map((entry) => entry.total_access_count);
 
-            // Update chart data
             accessStatisticsChart.data.labels = userNames;
             accessStatisticsChart.data.datasets[0].data = accessCounts;
             accessStatisticsChart.update();
@@ -277,7 +268,6 @@
           );
       }
 
-      // Call function to fetch access statistics
       fetchAccessStatistics();
     </script>
   </body>
