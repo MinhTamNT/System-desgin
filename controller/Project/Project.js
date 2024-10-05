@@ -13,6 +13,7 @@ import {
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { logActivity } from "../../helper/activity.js";
+import { createNotification } from "../Notification/Notification.js";
 
 const addProject = async (_, { name, description }, context) => {
   let connection;
@@ -181,7 +182,7 @@ const getProjectMemember = async (parent, { projectId }, context) => {
     const [res] = await pool.query(GET_MEMBER_IN_PROJECT, [projectId]);
     const projects = res.map((row) => ({
       ...row,
-      access: Boolean(row?.access),
+      access: row.access.toString(),
       is_host_user: row.is_host_user.toString() === "\x00" ? false : true,
       projectName: row.projectName,
       User: [
@@ -219,6 +220,13 @@ const updateRoleProjects = async (
       projectId,
     ]);
     connection.commit();
+    await createNotification({
+      message: "You have been granted access to this project",
+      userTaker: userId,
+      invitation_idInvitation: "",
+      userRequest: context?.uuid,
+      type: "STANDARD",
+    });
     return res;
   } catch (error) {
     connection.rollback();

@@ -9,13 +9,12 @@ import { pubsub } from "../../resolvers/resolvers.js";
 const createNotification = async ({
   message,
   userTaker,
-  invitation_idInvitation,
   userRequest,
   type,
 }) => {
   let connection;
   try {
-    if (!userRequest || !userTaker || !invitation_idInvitation) {
+    if (!userRequest || !userTaker) {
       throw new Error("Missing required parameters");
     }
     connection = await pool.getConnection();
@@ -24,11 +23,10 @@ const createNotification = async ({
     const idNotify = uuidv4();
     const isRead = false;
 
-    const [result] = await connection.query(CREATED_NOTIFICATION, [
+    await connection.query(CREATED_NOTIFICATION, [
       idNotify,
       message,
       isRead,
-      invitation_idInvitation,
       userTaker,
       userRequest,
       type,
@@ -42,8 +40,7 @@ const createNotification = async ({
         message,
         is_read: isRead,
         createdAt: new Date().toISOString(),
-        invitation_idInvitation,
-        userTaker,
+        userTaker: userTaker,
         userRequest: userRequest,
         type,
       },

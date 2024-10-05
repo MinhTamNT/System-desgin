@@ -79,7 +79,7 @@ type Inivitation {
 type UserProjectAccess {
   user_idUser: String
   project_idProject: String
-  access: Boolean
+  access: String
   is_host_user: Boolean
   lastAccessed: Date
   accessCount: Int
