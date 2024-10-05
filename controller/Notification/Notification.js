@@ -10,6 +10,7 @@ const createNotification = async ({
   message,
   userTaker,
   userRequest,
+  invitation_idInvitation,
   type,
 }) => {
   let connection;
@@ -42,6 +43,7 @@ const createNotification = async ({
         createdAt: new Date().toISOString(),
         userTaker: userTaker,
         userRequest: userRequest,
+        invitation_idInvitation,
         type,
       },
     });
@@ -71,10 +73,13 @@ const getNotificationsByUserId = async (parent, args, context) => {
     const [result] = await connection.query(GET_NOTIFY_BY_USERID, [
       context?.uuid,
     ]);
+
     const notifications = result.map((notification) => ({
       ...notification,
       is_read: Boolean(notification.is_read),
+      invitation_idInvitation: notification.idInvitation,
     }));
+    console.log("notifications by userId", notifications);
     return notifications;
   } catch (error) {
     if (connection) await connection.rollback();

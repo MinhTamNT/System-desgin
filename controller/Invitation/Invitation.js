@@ -17,6 +17,7 @@ const InivitationUser = async (
 ) => {
   let connection;
   try {
+    // Validate required parameters
     if (!context?.uuid || !email_content || !projectId || !userInvited) {
       throw new Error("Missing required parameters");
     }
@@ -24,7 +25,21 @@ const InivitationUser = async (
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    const [resultProject] = await connection.query(GET_PROJECT_ID, [projectId]);
+    if (resultProject.length === 0) {
+      throw new Error("Project not found");
+    }
+
     const idInivitation = uuidv4();
+
+    const newNotification = await createNotification({
+      message: `You have been invited to join the project ${resultProject[0].name}`,
+      userTaker: userInvited,
+      invitation_idInvitation: idInivitation,
+      userRequest: context?.uuid,
+      type: "INVITED",
+    });
+
     const [result] = await connection.query(ADD_INIVITATION, [
       idInivitation,
       email_content,
@@ -32,26 +47,16 @@ const InivitationUser = async (
       projectId,
       context?.uuid,
       userInvited,
+      newNotification?.idNotification,
     ]);
 
     if (result.affectedRows === 0) {
       throw new Error("Invitation not added");
     }
 
-    const [resultProject] = await connection.query(GET_PROJECT_ID, [projectId]);
-    if (resultProject.length === 0) {
-      throw new Error("Project not found");
-    }
-
     await connection.commit();
-    await createNotification({
-      message: `You have been invited to join the project ${resultProject[0].name}`,
-      userTaker: userInvited,
-      invitation_idInvitation: idInivitation,
-      userRequest: context?.uuid,
-      type: "INIVITED",
-    });
 
+    // Fetch user details
     const [getUser] = await connection.query(GET_USER_BY_ID, [userInvited]);
     if (getUser.length === 0) {
       throw new Error("User not found");
@@ -66,10 +71,12 @@ const InivitationUser = async (
 
     return result[0];
   } catch (error) {
+    // Rollback in case of error
     if (connection) await connection.rollback();
     console.error("Error inviting user:", error.message);
     throw new Error("Error inviting user: " + error.message);
   } finally {
+    // Release the connection
     if (connection) connection.release();
   }
 };

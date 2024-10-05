@@ -12,7 +12,7 @@ enum Permission {
 }
 
 enum TypeNotify {
-  INIVITED
+  INVITED
   STANDARD
 }
 
