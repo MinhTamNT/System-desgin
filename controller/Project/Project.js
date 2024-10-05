@@ -236,6 +236,57 @@ const updateRoleProjects = async (
   }
 };
 
+const removeUserFromProject = async (
+  parent,
+  { projectId, userId },
+  context
+) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const currentUserId = context?.uuid;
+    const [hostCheck] = await connection.query(
+      "SELECT is_host_user FROM user_has_project WHERE user_idUser = ? AND project_idProject = ?",
+      [currentUserId, projectId]
+    );
+    const isHostUser = hostCheck[0]?.is_host_user
+      ? Boolean(hostCheck[0].is_host_user[0])
+      : false;
+
+    if (hostCheck.length === 0 || isHostUser !== true) {
+      throw new Error(
+        "You do not have permission to remove users from this project."
+      );
+    }
+
+    const [res] = await connection.query(
+      "DELETE FROM user_has_project WHERE user_idUser = ? AND project_idProject = ?",
+      [userId, projectId]
+    );
+
+    await connection.commit();
+    await createNotification({
+      message: "You have been removed from this project",
+      userTaker: userId,
+      invitation_idInvitation: "",
+      userRequest: context?.uuid,
+      type: "DELETE",
+    });
+    return {
+      message: "User has been removed from the project.",
+      affectedRows: res.affectedRows,
+    };
+  } catch (error) {
+    if (connection) await connection.rollback();
+    console.log(error);
+    throw new Error("An error occurred while removing the user.");
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
 export {
   addProject,
   deletedProject,
@@ -245,4 +296,5 @@ export {
   getRecentProjectsWithAccess,
   getProjectMemember,
   updateRoleProjects,
+  removeUserFromProject,
 };

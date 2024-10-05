@@ -17,7 +17,6 @@ const InivitationUser = async (
 ) => {
   let connection;
   try {
-    // Validate required parameters
     if (!context?.uuid || !email_content || !projectId || !userInvited) {
       throw new Error("Missing required parameters");
     }

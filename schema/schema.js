@@ -14,6 +14,7 @@ enum Permission {
 enum TypeNotify {
   INVITED
   STANDARD
+  DELETE
 }
 
 enum Status {
@@ -134,7 +135,7 @@ type Mutation {
     deletedProjectId(projectId:String) : News
     updateProjectAcces( projectId: String!): UserProjectAccess
     updateRoleProject( projectId: String! , userId: String! , role: String!): UserProjectAccess
-    
+    removeUserFromProject(projectId: String!, userId: String!): UserProjectAccess
 
 }
 type Subscription {

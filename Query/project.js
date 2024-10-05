@@ -75,3 +75,8 @@ export const UPDATE_USER_ROLE_IN_PROJECT = `
     UPDATE user_has_project
     SET access = ? WHERE user_idUser = ? AND project_idProject = ?
 `;
+
+export const DELETED_USER_FROM_PROJECT = `
+    DELETE FROM user_has_project
+    WHERE user_idUser = ? AND project_idProject = ?
+`;
