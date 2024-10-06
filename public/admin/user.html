@@ -39,6 +39,13 @@
           </li>
           <li class="mb-4">
             <a
+              href="./inviation.html"
+              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
+              >Invitations</a
+            >
+          </li>
+          <li class="mb-4">
+            <a
               href="./notification.html"
               class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
               >Notifications</a
@@ -121,13 +128,12 @@
 
       async function fetchUsers() {
         try {
-          const response = await axios.get("/v1/api/users"); // Fetch data from API
-          const users = response.data; // Extract data from response
+          const response = await axios.get("/v1/api/users");
+          const users = response.data;
 
-          const userList = document.getElementById("user-list"); // Get the table body element
-          userList.innerHTML = ""; // Clear existing content
+          const userList = document.getElementById("user-list");
+          userList.innerHTML = "";
 
-          // Populate table with user data
           users.forEach((user) => {
             const row = document.createElement("tr");
             row.classList.add("border-b", "border-gray-200");
@@ -138,7 +144,7 @@
                 <a href="#" class="text-red-500 hover:underline" onclick="showDeleteModal('${user.idUser}')">Delete</a>
               </td>
             `;
-            userList.appendChild(row); // Add row to the table body
+            userList.appendChild(row);
           });
         } catch (error) {
           console.error("Error fetching users:", error);
@@ -188,7 +194,7 @@
         .getElementById("cancelDelete")
         .addEventListener("click", hideDeleteModal);
 
-      fetchUsers(); // Call the function to load users when the page loads
+      fetchUsers();
     </script>
   </body>
 </html>
