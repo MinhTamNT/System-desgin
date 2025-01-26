@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { pool } from "../../config/mysqlConfig.js";
+import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import {
   DELETE_PROJECT_BY_ID,
   GET_MEMBER_IN_PROJECT,
@@ -16,64 +16,94 @@ import { logActivity } from "../../helper/activity.js";
 import { createNotification } from "../Notification/Notification.js";
 
 const addProject = async (_, { name, description }, context) => {
-  let connection;
+  // let connection;
+  // try {
+  //   connection = await pool.getConnection();
+  //   const idProject = uuidv4();
+  //   await connection.beginTransaction();
+
+  //   await connection.query(INSERT_PROJECT, [idProject, name, description]);
+
+  //   const idCreated = idProject;
+
+  //   await connection.query(INSERT_USER_PROJECT, [
+  //     context?.uuid,
+  //     idCreated,
+  //     "ROLE_WRITE",
+  //     true,
+  //   ]);
+
+  //   await connection.commit();
+  //   await logActivity(
+  //     "CREATE_PROJECT",
+  //     `Created project: ${name}`,
+  //     idCreated,
+  //     context?.uuid
+  //   );
+  //   await liveblocks.createRoom(idCreated, {
+  //     defaultAccesses: ["room:write"],
+  //   });
+  //   return {
+  //     idProject: idCreated,
+  //     name,
+  //     description,
+  //   };
+  // } catch (error) {
+  //   if (connection) await connection.rollback();
+  //   throw new Error("Error adding project: " + error.message);
+  // } finally {
+  //   if (connection) connection.release();
+  // }
+
   try {
-    connection = await pool.getConnection();
-    const idProject = uuidv4();
-    await connection.beginTransaction();
-
-    await connection.query(INSERT_PROJECT, [idProject, name, description]);
-
-    const idCreated = idProject;
-
-    await connection.query(INSERT_USER_PROJECT, [
-      context?.uuid,
-      idCreated,
-      "ROLE_WRITE",
-      true,
-    ]);
-
-    await connection.commit();
-    await logActivity(
-      "CREATE_PROJECT",
-      `Created project: ${name}`,
-      idCreated,
-      context?.uuid
-    );
-    await liveblocks.createRoom(idCreated, {
-      defaultAccesses: ["room:write"],
-    });
-    return {
-      idProject: idCreated,
+    const result = await ExecuteStore("Project_CreateProject", [
       name,
       description,
-    };
+      null,
+      context?.uuid,
+    ]);
+    console.log(result);
+    return result;
   } catch (error) {
-    if (connection) await connection.rollback();
-    throw new Error("Error adding project: " + error.message);
-  } finally {
-    if (connection) connection.release();
+    console.log(error);
   }
 };
 
-const getUserProjects = async (parent, args, context) => {
-  console.log(context?.uuid);
-  let connection;
+const getUserProjects = async (parent, { pageIndex, pageSize }, context) => {
   try {
-    connection = await pool.getConnection();
-
-    const [projects] = await connection.query(GET_PROJECT_BY_ID, [
-      context?.uuid,
+    const result = await ExecuteStore("UserProject_LoadProject", [
+      "",
+      pageIndex,
+      pageSize,
     ]);
-    console.log(projects);
-    return projects.map((project) => ({
-      ...project,
-      is_host_user: project.is_host_user.toString() === "\x00" ? false : true,
-    }));
+
+    console.log("Raw result:", result[0]);
+
+    const projects = Array.isArray(result[0])
+      ? result[0].map((project) => ({
+          idProject: project.project_idProject || project.idProject,
+          name: project.projectName || project.name,
+          user_idUser: project.user_idUser,
+          access: project.access,
+          is_host_user: project.is_host_user?.data?.[0] === 1,
+          lastAccessed: project.lastAccessed,
+          accessCount: project.accessCount,
+        }))
+      : [];
+
+    const totalRow = result[0]?.[0]?.TOTALROW || 0;
+
+    const response = {
+      projects: projects,
+      pageInfo: {
+        TOTALROW: totalRow,
+      },
+    };
+
+    return response;
   } catch (error) {
+    console.error("Error fetching projects:", error);
     throw new Error("Error fetching user projects: " + error.message);
-  } finally {
-    if (connection) connection.release();
   }
 };
 

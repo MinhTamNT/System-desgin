@@ -54,6 +54,7 @@ export const resolvers = {
         return result;
       } catch (error) {
         console.log(error);
+        throw new Error("Failed to fetch user");
       }
     },
   },
@@ -73,6 +74,18 @@ export const resolvers = {
     sender: async (parent) => {
       const sender = await User.findOne({ uuid: parent.sender });
       return sender;
+    },
+  },
+  AddUserResponse: {
+    __resolveType(obj) {
+      console.log(obj);
+      if (obj.idUser) {
+        return "User";
+      }
+      if (obj.retCode !== undefined) {
+        return "ProccessObj";
+      }
+      return null;
     },
   },
 

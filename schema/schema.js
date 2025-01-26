@@ -1,5 +1,6 @@
 export const typeDefs = `#graphql
 scalar Date
+union AddUserResponse = User | ProccessObj
 
 enum NameRole {
   ROLE_ADMIN
@@ -40,16 +41,25 @@ type User {
 }
 
 type Project {
-  idProject: String!
-  name: String!
+  idProject: ID!
+  name: String
   description: String
   createdAt: String
   updatedAt: String
   access: String
   is_host_user: Boolean
-
 }
 
+type PageInfo {
+  TOTALROW: Int
+  IND: Int
+}
+
+type ProccessObj {
+  RetCode : Int,
+  RetMessgae : String
+
+}
 
 type Conversation {
   id: ID!
@@ -111,9 +121,15 @@ type News {
   message:String
 }
 
+type ProjectsResponse {
+  projects: [Project]
+  pageInfo: PageInfo
+}
+
+
 
 type Query {
-  getUserProjects: [Project]
+  getUserProjects(pageIndex: Int, pageSize: Int): ProjectsResponse
   searchUserByName(searchText:String!):[User]
   getNotificationsByUserId: [Notification]
   getProjectTeams : [Project]
@@ -125,9 +141,10 @@ type Query {
 
 }
 
+
 type Mutation {
-    addUser(idUser:String!,name: String!, profilePicture: String, roleId: Int! , email:String!): User
-    addProject(name:String!,description:String!):Project
+    addUser(idUser:String!,name: String!, profilePicture: String , email:String! , TokenUser:String! , expireAt: String!): [AddUserResponse]
+    addProject(name:String!,description:String!): ProccessObj
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
     updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
     createConversation(receiverId:String!): Conversation

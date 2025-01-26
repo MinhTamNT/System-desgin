@@ -34,6 +34,7 @@ async function Authority(req, res, next) {
     const user = await verifyGoogleToken(token);
     req.user = user;
     res.locals.uuid = user?.sub;
+    res.locals.token = token;
     next();
   } catch (error) {
     if (error) {

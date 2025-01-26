@@ -1,65 +1,57 @@
-import { pool } from "../../config/mysqlConfig.js";
+import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import User from "../../model/User.js";
-import {
-  INSERT_USER,
-  CHECK_USER_EXISTS,
-  SEARCH_USER_NAME,
-} from "../../Query/user.js";
+import { CHECK_USER_EXISTS, SEARCH_USER_NAME } from "../../Query/user.js";
 const checkUserExists = async (name) => {
   const [rows] = await pool.query(CHECK_USER_EXISTS, [name]);
   return rows.length > 0;
 };
 
 const addNewUser = async (
-  _,
-  { idUser, name, profilePicture, roleId, email }
+  args,
+  { idUser, name, profilePicture, email, tokenUser, expireAt },
+  context
 ) => {
-  let connection;
-
   try {
-    connection = await pool.getConnection();
-
-    // Check if the user already exists in MongoDB
     const existingUser = await User.findOne({ uuid: idUser });
     if (!existingUser) {
       const newUser = new User({
         name,
         profilePicture,
-        uuid: idUser,
+        uuid: context?.uuid,
       });
       await newUser.save();
     }
-
-    const userExistsInSQL = await checkUserExists(name);
-    if (userExistsInSQL) {
-      return;
-    }
-
-    await connection.beginTransaction();
-
-    await connection.query(INSERT_USER, [
-      idUser,
-      name,
+    // console.log("Received tokenUser:", context);
+    const result = await ExecuteStore("UserProfile_AddUser", [
+      context?.uuid,
       profilePicture,
-      roleId,
+      context?.token,
+      expireAt,
+      name,
       email,
     ]);
 
-    await connection.commit();
-
-    return {
-      name,
-      profilePicture,
-      roleId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    if (result) {
+      console.log(result[0][0].retCode);
+    }
+    return [
+      {
+        idUser: result[1][0].idUser,
+        profilePicture: result[1][3].profilePicture,
+        email: result[1][4].email,
+      },
+      {
+        retCode: result[0][0].retCode,
+        retMessage: retMessresult[0][1].retMessage,
+      },
+    ];
   } catch (error) {
-    if (connection) await connection.rollback();
-    throw new Error("Error adding user: " + error.message);
-  } finally {
-    // Release the connection
-    if (connection) connection.release();
+    return [
+      {
+        retCode: -1,
+        retMessage: "Error adding user: " + error.message,
+      },
+    ];
   }
 };
 

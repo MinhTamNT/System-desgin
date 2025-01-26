@@ -18,6 +18,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import adminRoute from "./controllerAdmin/routeApi.js";
 import { authenticateToken } from "./middleware/adminMiddleware.js";
+import jwt from "jsonwebtoken";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -51,9 +53,40 @@ const server = new ApolloServer({
   ],
 });
 
+const refreshTokenMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      res.locals.uuid = decoded.uuid;
+      res.locals.token = token;
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        try {
+          const decoded = jwt.decode(token);
+          const newToken = jwt.sign(
+            { uuid: decoded.uuid },
+            process.env.JWT_SECRET,
+            { expiresIn: "24h" }
+          );
+          res.locals.uuid = decoded.uuid;
+          res.locals.token = newToken;
+          res.setHeader("New-Token", newToken);
+        } catch (err) {
+          res.locals.uuid = null;
+          res.locals.token = null;
+        }
+      }
+    }
+  }
+  next();
+};
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(Authority);
+app.use(refreshTokenMiddleware);
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/admin", admin);
@@ -65,6 +98,8 @@ async function startApolloServer() {
     expressMiddleware(server, {
       context: ({ req, res }) => ({
         uuid: res.locals.uuid,
+        token: res.locals.token,
+        newToken: res.getHeader("New-Token"),
       }),
     })
   );
