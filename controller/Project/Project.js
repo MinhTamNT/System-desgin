@@ -1,60 +1,16 @@
-import { v4 as uuidv4 } from "uuid";
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import {
   DELETE_PROJECT_BY_ID,
   GET_MEMBER_IN_PROJECT,
-  GET_PROJECT_BY_ID,
   GET_PROJECT_TEAM,
   GET_RECENT_PROJECT,
-  INSERT_PROJECT,
-  INSERT_USER_PROJECT,
   UPDATE_USER_ROLE_IN_PROJECT,
   USER_HAS_PROJECT,
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
-import { logActivity } from "../../helper/activity.js";
 import { createNotification } from "../Notification/Notification.js";
 
 const addProject = async (_, { name, description }, context) => {
-  // let connection;
-  // try {
-  //   connection = await pool.getConnection();
-  //   const idProject = uuidv4();
-  //   await connection.beginTransaction();
-
-  //   await connection.query(INSERT_PROJECT, [idProject, name, description]);
-
-  //   const idCreated = idProject;
-
-  //   await connection.query(INSERT_USER_PROJECT, [
-  //     context?.uuid,
-  //     idCreated,
-  //     "ROLE_WRITE",
-  //     true,
-  //   ]);
-
-  //   await connection.commit();
-  //   await logActivity(
-  //     "CREATE_PROJECT",
-  //     `Created project: ${name}`,
-  //     idCreated,
-  //     context?.uuid
-  //   );
-  //   await liveblocks.createRoom(idCreated, {
-  //     defaultAccesses: ["room:write"],
-  //   });
-  //   return {
-  //     idProject: idCreated,
-  //     name,
-  //     description,
-  //   };
-  // } catch (error) {
-  //   if (connection) await connection.rollback();
-  //   throw new Error("Error adding project: " + error.message);
-  // } finally {
-  //   if (connection) connection.release();
-  // }
-
   try {
     const result = await ExecuteStore("Project_CreateProject", [
       name,
@@ -69,12 +25,17 @@ const addProject = async (_, { name, description }, context) => {
   }
 };
 
-const getUserProjects = async (parent, { pageIndex, pageSize }, context) => {
+const getUserProjects = async (
+  parent,
+  { pageIndex, pageSize, nameProject },
+  context
+) => {
   try {
     const result = await ExecuteStore("UserProject_LoadProject", [
-      "",
+      nameProject,
       pageIndex,
       pageSize,
+      context?.uuid,
     ]);
 
     console.log("Raw result:", result[0]);
@@ -177,43 +138,13 @@ const updateUserProjectAccess = async (parent, { projectId }, context) => {
   }
 };
 
-const getRecentProjectsWithAccess = async (parent, args, context) => {
-  let connection;
-  try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-
-    const [res] = await connection.query(GET_RECENT_PROJECT, [context?.uuid]);
-
-    const projects = res.map((row) => ({
-      ...row,
-      access: Boolean(row?.access),
-      is_host_user: row.is_host_user.toString() === "\x00" ? false : true,
-      projectName: row.projectName,
-    }));
-
-    console.log(projects);
-
-    return projects;
-  } catch (error) {
-    if (connection) await connection.rollback(); // rollback nếu có lỗi
-    console.log(error);
-    throw new Error("Error fetching recent projects");
-  } finally {
-    if (connection) connection.release(); // Gọi phương thức release
-  }
-};
-
 const getProjectMemember = async (parent, { projectId }, context) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    const [res] = await pool.query(GET_MEMBER_IN_PROJECT, [projectId]);
-    const projects = res.map((row) => ({
+    const res = await ExecuteStore("Project_GetMember", [projectId]);
+    const projects = res[0]?.map((row) => ({
       ...row,
-      access: row.access.toString(),
-      is_host_user: row.is_host_user.toString() === "\x00" ? false : true,
+      access: row.access,
+      is_host_user: row.is_host_user == 1 ? true : false,
       projectName: row.projectName,
       User: [
         {
@@ -223,14 +154,9 @@ const getProjectMemember = async (parent, { projectId }, context) => {
         },
       ],
     }));
-    console.log(projects);
-    connection.commit();
     return projects;
   } catch (error) {
-    connection.rollback();
     console.log(error);
-  } finally {
-    if (connection) connection.release;
   }
 };
 
@@ -323,7 +249,6 @@ export {
   getProjectTeams,
   getUserProjects,
   updateUserProjectAccess,
-  getRecentProjectsWithAccess,
   getProjectMemember,
   updateRoleProjects,
   removeUserFromProject,

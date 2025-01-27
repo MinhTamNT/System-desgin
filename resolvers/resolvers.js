@@ -9,7 +9,6 @@ import {
   deletedProject,
   getProjectMemember,
   getProjectTeams,
-  getRecentProjectsWithAccess,
   getUserProjects,
   removeUserFromProject,
   updateRoleProjects,
@@ -40,7 +39,6 @@ export const resolvers = {
     getConversation: getConversation,
     getMessageConversationId: getMessageConversationId,
     getUserActivityLog: getActivatyUser,
-    getRecentProjectsWithAccess: getRecentProjectsWithAccess,
     getMememberInProject: getProjectMemember,
   },
   Notification: {

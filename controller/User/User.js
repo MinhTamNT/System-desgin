@@ -7,7 +7,7 @@ const checkUserExists = async (name) => {
 };
 
 const addNewUser = async (
-  args,
+  args, 
   { idUser, name, profilePicture, email, tokenUser, expireAt },
   context
 ) => {
