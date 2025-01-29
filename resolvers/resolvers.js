@@ -105,6 +105,9 @@ export const resolvers = {
         return pubsub.asyncIterator([NOTIFICATION_CREATED]);
       },
     },
+    heartbeat: {
+      subscribe: () => pubsub.asyncIterator("HEARTBEAT"),
+    },
     messageCreated: {
       subscribe: () => {
         return pubsub.asyncIterator([MESSAGE_CREATED]);

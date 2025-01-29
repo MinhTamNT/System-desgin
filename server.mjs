@@ -12,14 +12,24 @@ import mongoose from "mongoose";
 import { WebSocketServer } from "ws";
 import { configMySql } from "./config/mysqlConfig.js";
 import { Authority } from "./middleware/verifyToken.js";
-import { resolvers } from "./resolvers/resolvers.js";
+import { pubsub, resolvers } from "./resolvers/resolvers.js";
 import { typeDefs } from "./schema/schema.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import adminRoute from "./controllerAdmin/routeApi.js";
 import { authenticateToken } from "./middleware/adminMiddleware.js";
 import jwt from "jsonwebtoken";
+import {
+  initRedis,
+  removeConnection,
+  storeConnection,
+} from "./config/redis.js";
+import { OAuth2Client } from "google-auth-library";
+import "dotenv/config";
+import { verifyGoogleToken } from "./helper/Token.js";
+import { log } from "console";
 
+const client = new OAuth2Client(process.env.CLIENT_ID_GOOGLE);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -36,6 +46,7 @@ const wsServer = new WebSocketServer({
   server: httpServer,
   path: "/graphql",
 });
+
 const serverCleanup = useServer({ schema }, wsServer);
 
 const server = new ApolloServer({
@@ -51,6 +62,38 @@ const server = new ApolloServer({
       },
     },
   ],
+});
+
+const connectedUsers = new Map(); // Store userID -> connection mapping
+
+wsServer.on("connection", (connection, req) => {
+  console.log("New client connected");
+
+  connection.on("message", async (message) => {
+    try {
+      const parsedMessage = JSON.parse(message.toString());
+      if (
+        parsedMessage.type === "connection_init" &&
+        parsedMessage.payload.Authorization
+      ) {
+        const token = parsedMessage.payload.Authorization;
+        var decoded = await verifyGoogleToken(token);
+        console.log("User connected:", decoded.sub);
+        connectedUsers.set(decoded.sub, connection);
+        storeConnection(decoded.sub, connection.id);
+
+        connection.userId = decoded.sub;
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+    }
+  });
+
+  connection.on("close", () => {
+    console.log(`Client ${connection.userId} disconnected`);
+    connectedUsers.delete(connection.userId);
+    removeConnection(connection.userId, connection);
+  });
 });
 
 const refreshTokenMiddleware = async (req, res, next) => {
@@ -104,7 +147,7 @@ async function startApolloServer() {
     })
   );
 }
-
+initRedis();
 configMySql.connect(function (err) {
   if (err) throw err;
   console.log("Connected Mysql !!!");
@@ -125,3 +168,7 @@ startApolloServer().then(() => {
     console.log(`🛠 Admin Page available at http://localhost:${PORT}/admin`);
   });
 });
+
+setInterval(() => {
+  pubsub.publish("HEARTBEAT", { heartbeat: true });
+}, 5000);

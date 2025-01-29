@@ -9,7 +9,6 @@ import {
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { createNotification } from "../Notification/Notification.js";
-
 const addProject = async (_, { name, description }, context) => {
   try {
     const result = await ExecuteStore("Project_CreateProject", [

@@ -38,6 +38,8 @@ type User {
   createdAt: Date
   updatedAt: Date
   roleId: Int
+  status: String
+  deviceId: String
 }
 
 type Project {
@@ -129,7 +131,7 @@ type ProjectsResponse {
 
 
 type Query {
-  getUserProjects(pageIndex: Int, pageSize: Int): ProjectsResponse
+  getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
   searchUserByName(searchText:String!):[User]
   getNotificationsByUserId: [Notification]
   getProjectTeams : [Project]
@@ -158,6 +160,6 @@ type Mutation {
 type Subscription {
   notificationCreated: Notification
   messageCreated : Message
-
+  heartbeat: Boolean
 }
 `;
