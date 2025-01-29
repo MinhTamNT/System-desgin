@@ -69,6 +69,7 @@ const addNewUser = async (
         profilePicture: result[1][0].profilePicture,
         email: result[1][0].email,
         deviceId: deviceId,
+        status: "online",
       },
       {
         retCode: result[0][0].retCode,
@@ -150,12 +151,10 @@ const getOnlineUsers = async () => {
   }
 };
 
-// Helper function để kiểm tra Redis
 const checkRedisConnection = async () => {
   try {
     const redis = getRedis();
 
-    // Test basic operations
     await redis.set("test", "working");
     const testResult = await redis.get("test");
     await redis.del("test");

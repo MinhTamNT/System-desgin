@@ -24,12 +24,10 @@ import {
   removeConnection,
   storeConnection,
 } from "./config/redis.js";
-import { OAuth2Client } from "google-auth-library";
 import "dotenv/config";
 import { verifyGoogleToken } from "./helper/Token.js";
-import { log } from "console";
-
-const client = new OAuth2Client(process.env.CLIENT_ID_GOOGLE);
+import { PubSub } from "graphql-subscriptions";
+initRedis();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -62,38 +60,6 @@ const server = new ApolloServer({
       },
     },
   ],
-});
-
-const connectedUsers = new Map(); // Store userID -> connection mapping
-
-wsServer.on("connection", (connection, req) => {
-  console.log("New client connected");
-
-  connection.on("message", async (message) => {
-    try {
-      const parsedMessage = JSON.parse(message.toString());
-      if (
-        parsedMessage.type === "connection_init" &&
-        parsedMessage.payload.Authorization
-      ) {
-        const token = parsedMessage.payload.Authorization;
-        var decoded = await verifyGoogleToken(token);
-        console.log("User connected:", decoded.sub);
-        connectedUsers.set(decoded.sub, connection);
-        storeConnection(decoded.sub, connection.id);
-
-        connection.userId = decoded.sub;
-      }
-    } catch (error) {
-      console.error("Error processing message:", error);
-    }
-  });
-
-  connection.on("close", () => {
-    console.log(`Client ${connection.userId} disconnected`);
-    connectedUsers.delete(connection.userId);
-    removeConnection(connection.userId, connection);
-  });
 });
 
 const refreshTokenMiddleware = async (req, res, next) => {
@@ -147,7 +113,7 @@ async function startApolloServer() {
     })
   );
 }
-initRedis();
+
 configMySql.connect(function (err) {
   if (err) throw err;
   console.log("Connected Mysql !!!");
@@ -162,6 +128,60 @@ mongoose
   .then(() => console.log("Connection to database successful"))
   .catch((error) => console.error("Error connecting to database:", error));
 
+const connectedUsers = new Map(); // Store userID -> connection mapping
+let useStatus = {};
+wsServer.on("connection", (connection, req) => {
+  console.log("New client connected");
+
+  connection.on("message", async (message) => {
+    try {
+      const parsedMessage = JSON.parse(message.toString());
+      if (
+        parsedMessage.type === "connection_init" &&
+        parsedMessage.payload.Authorization
+      ) {
+        const token = parsedMessage.payload.Authorization;
+        const decoded = await verifyGoogleToken(token);
+        if (!decoded || !decoded.sub) {
+          console.error("Invalid Google token");
+          return;
+        }
+
+        console.log("User connected:", decoded.sub);
+        connectedUsers.set(decoded.sub, connection);
+        storeConnection(decoded.sub, connection.id);
+        connection.userId = decoded.sub;
+      }
+      useStatus = {
+        userId: connection.userId,
+        status: "online",
+      };
+      pubsub.publish("USER_STATUS_CHANGED", {
+        userId: connection.userId,
+        status: "online",
+      });
+    } catch (error) {
+      console.error("Error processing message:", error);
+    }
+  });
+
+  connection.on("close", () => {
+    if (!connection.userId) {
+      console.warn("Connection closed but userId was undefined.");
+      return;
+    }
+
+    console.log(`Client ${connection.userId} disconnected`);
+    pubsub.publish("USER_STATUS_CHANGED", {
+      userId: connection.userId,
+      status: "offline",
+    });
+
+    connectedUsers.delete(connection.userId);
+    removeConnection(connection.userId, connection);
+  });
+});
+
 startApolloServer().then(() => {
   httpServer.listen({ port: PORT }, () => {
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
@@ -169,6 +189,9 @@ startApolloServer().then(() => {
   });
 });
 
-setInterval(() => {
-  pubsub.publish("HEARTBEAT", { heartbeat: true });
-}, 5000);
+const userStatuses = new Map(); // Để lưu trữ trạng thái người dùng
+
+pubsub.subscribe("USER_STATUS_CHANGED", (payload) => {
+  console.log("User status changed:", payload);
+  userStatuses.set(payload.userId, payload.status);
+});

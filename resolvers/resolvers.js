@@ -113,5 +113,14 @@ export const resolvers = {
         return pubsub.asyncIterator([MESSAGE_CREATED]);
       },
     },
+    userStatusChanged: {
+      subscribe: () => pubsub.asyncIterator(["USER_STATUS_CHANGED"]),
+      resolve: (payload) => {
+        return {
+          userId: payload.userId,
+          status: payload.status,
+        };
+      },
+    },
   },
 };

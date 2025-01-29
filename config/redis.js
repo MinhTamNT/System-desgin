@@ -10,7 +10,7 @@ export const initRedis = async () => {
         port: process.env.REDIS_PORT || 6379,
         password: process.env.REDIS_PASSWORD,
         retryStrategy: (times) => {
-          const delay = Math.min(times * 50, 2000);
+          const delay = Math.min(times * 10, 2000);
           return delay;
         },
       });
@@ -51,7 +51,6 @@ export function getConnections(userId, callback) {
 }
 
 export function removeConnection(userId, connectionId) {
-  console.log(userId);
   redisClient.srem("online:users", userId);
   console.log(`Removed ${userId} from Redis`);
 }

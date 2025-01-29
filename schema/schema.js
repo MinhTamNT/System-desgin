@@ -128,7 +128,10 @@ type ProjectsResponse {
   pageInfo: PageInfo
 }
 
-
+type UserStatus {
+    userId: String
+    status: String
+  }
 
 type Query {
   getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
@@ -161,5 +164,6 @@ type Subscription {
   notificationCreated: Notification
   messageCreated : Message
   heartbeat: Boolean
+  userStatusChanged: UserStatus
 }
 `;
