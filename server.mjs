@@ -26,7 +26,6 @@ import {
 } from "./config/redis.js";
 import "dotenv/config";
 import { verifyGoogleToken } from "./helper/Token.js";
-import { PubSub } from "graphql-subscriptions";
 initRedis();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

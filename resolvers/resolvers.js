@@ -27,6 +27,7 @@ import {
   getMessageConversationId,
 } from "../controller/Message/Message.js";
 import { getActivatyUser } from "../controller/Activaty/Activaty.js";
+import { GraphQLUnionType } from "graphql";
 export const pubsub = new PubSub();
 const NOTIFICATION_CREATED = "NOTIFICATION_CREATED";
 const MESSAGE_CREATED = "MESSAGE_CREATED";
@@ -75,16 +76,20 @@ export const resolvers = {
     },
   },
   AddUserResponse: {
-    __resolveType(obj) {
-      console.log(obj);
-      if (obj.idUser) {
-        return "User";
-      }
-      if (obj.retCode !== undefined) {
-        return "ProccessObj";
-      }
-      return null;
-    },
+  __resolveType(value) {
+    console.log("Resolved value:", value);
+    
+    if (value && value.RetCode !== undefined) {
+      console.log("Resolved to ProccessObj: ", value.RetCode);
+      return "ProccessObj";  // Return the type name as a string
+    }
+    if (value && value.idUser) {
+      console.log("Resolved to User: ", value.idUser);
+      return "User";
+    }
+    console.log("Unable to determine type for value:", value);
+    return null;
+  },
   },
 
   Mutation: {

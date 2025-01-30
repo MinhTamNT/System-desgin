@@ -55,7 +55,6 @@ const InivitationUser = async (
 
     await connection.commit();
 
-    // Fetch user details
     const [getUser] = await connection.query(GET_USER_BY_ID, [userInvited]);
     if (getUser.length === 0) {
       throw new Error("User not found");

@@ -43,10 +43,12 @@ export function storeConnection(userId, connectionId) {
   redisClient.sadd("online:users", userId);
 }
 
-export function getConnections(userId, callback) {
-  redisClient.smembers(`${userId}`, (err, connections) => {
-    if (err) return callback(err, null);
-    callback(null, connections);
+export function getConnections(userId) {
+  return new Promise((resolve, reject) => {
+    redisClient.smembers(`${userId}`, (err, connections) => {
+      if (err) return reject(err);
+      resolve(connections);
+    });
   });
 }
 

@@ -1,7 +1,5 @@
 import { pool } from "../../config/mysqlConfig.js";
-import { v4 as uuidv4 } from "uuid";
 import {
-  CREATED_NOTIFICATION,
   GET_NOTIFY_BY_USERID,
 } from "../../Query/notify.js";
 import { pubsub } from "../../resolvers/resolvers.js";
@@ -13,55 +11,41 @@ const createNotification = async ({
   invitation_idInvitation,
   type,
 }) => {
-  let connection;
   try {
-    if (!userRequest || !userTaker) {
-      throw new Error("Missing required parameters");
-    }
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-
-    const idNotify = uuidv4();
-    const isRead = false;
-
-    await connection.query(CREATED_NOTIFICATION, [
-      idNotify,
+    const res = await ExecuteStore("Notification_InsertNewNotify", [
       message,
-      isRead,
       userTaker,
       userRequest,
       type,
     ]);
-
-    await connection.commit();
-
+    const data = res[0][0];
     pubsub.publish("NOTIFICATION_CREATED", {
       notificationCreated: {
-        idNotification: idNotify,
-        message,
-        is_read: isRead,
-        createdAt: new Date().toISOString(),
-        userTaker: userTaker,
-        userRequest: userRequest,
-        invitation_idInvitation,
-        type,
+        idNotification: data.idNotify,
+        message: data.message,
+        is_read: data.isRead,
+        createdAt: data.createdAt,
+        userTaker: data.User_idUser_taker,
+        userRequest: data.User_idUser_requested,
+        type: data.type,
       },
     });
 
     return {
-      idNotification: idNotify,
-      message,
-      is_read: isRead,
-      createdAt: new Date().toISOString(),
-      userTaker,
-      userRequest,
-      type,
+      idNotification: data.idNotify,
+      message: data.message,
+      is_read: data.isRead,
+      createdAt: data.createdAt,
+      userTaker: data.User_idUser_taker,
+      userRequest: data.User_idUser_requested,
+      type: data.type,
     };
   } catch (error) {
-    if (connection) await connection.rollback();
-    throw new Error("Error adding notification: " + error.message);
-  } finally {
-    if (connection) connection.release();
+    console.log(error);
+    return {
+      retCode: -1,
+      retMessage: error.message || "Error creating notification",
+    };
   }
 };
 

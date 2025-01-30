@@ -135,7 +135,7 @@ type UserStatus {
 
 type Query {
   getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
-  searchUserByName(searchText:String!):[User]
+  searchUserByName(searchText:String!): [AddUserResponse]
   getNotificationsByUserId: [Notification]
   getProjectTeams : [Project]
   getConversation: [Conversation]
@@ -155,7 +155,7 @@ type Mutation {
     createConversation(receiverId:String!): Conversation
     createMessage(message:String! , conversationId:ID): Message
     deletedProjectId(projectId:String) : News
-    updateProjectAcces( projectId: String!): UserProjectAccess
+    updateProjectAcces( projectId: String!): ProccessObj
     updateRoleProject( projectId: String! , userId: String! , role: String!): UserProjectAccess
     removeUserFromProject(projectId: String!, userId: String!): UserProjectAccess
 

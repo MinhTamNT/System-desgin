@@ -1,5 +1,5 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
-import { getRedis } from "../../config/redis.js";
+import { getConnections, getRedis } from "../../config/redis.js";
 import User from "../../model/User.js";
 import { CHECK_USER_EXISTS, SEARCH_USER_NAME } from "../../Query/user.js";
 const checkUserExists = async (name) => {
@@ -101,19 +101,44 @@ const addNewUser = async (
 };
 
 const SearchUserByName = async (_, { searchText }) => {
-  let connect;
   try {
-    connect = await pool.getConnection();
-    await connect.beginTransaction();
-    const [resut] = await connect.query(SEARCH_USER_NAME, [`%${searchText}%`]);
-    return resut;
+    const result = await ExecuteStore("User_SearchUser", [searchText]);
+    console.log(result);
+    if (result && result[0] && result[0][0].idUser) {
+      const user = result[0][0];
+      const checkOnline = await getConnections(user.idUser);
+      const isOnLine = checkOnline.includes(user.idUser);
+      return [
+        {
+          __typename: 'User', 
+          idUser: user.idUser,
+          status: isOnLine,
+          profilePicture: user.profilePicture,
+          name: user.name,
+        },
+      ];
+    } else {
+      const error = result[0][0];
+      return [
+        {
+          __typename: 'ProccessObj', 
+          RetCode: error.retCode,
+          RetMessgae: error.retMessage,
+        },
+      ];
+    }
   } catch (error) {
     console.error("Error searching user:", error);
-    throw error;
-  } finally {
-    if (connect) connect.release();
+    return [
+      {
+        __typename: 'ProccessObj',
+        retCode: -5000,
+        retMessage: "Internal server error",
+      },
+    ];
   }
 };
+
 
 const updateUserStatus = async (_, { userId, idLogon, deviceId }) => {
   try {

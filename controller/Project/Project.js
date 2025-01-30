@@ -1,11 +1,8 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import {
   DELETE_PROJECT_BY_ID,
-  GET_MEMBER_IN_PROJECT,
   GET_PROJECT_TEAM,
-  GET_RECENT_PROJECT,
   UPDATE_USER_ROLE_IN_PROJECT,
-  USER_HAS_PROJECT,
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { createNotification } from "../Notification/Notification.js";
@@ -119,21 +116,14 @@ const deletedProject = async (_, { projectId }, context) => {
 };
 
 const updateUserProjectAccess = async (parent, { projectId }, context) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    const [res] = await pool.query(USER_HAS_PROJECT, [
-      context?.uuid,
+    const res = await ExecuteStore("Project_UpdateProjectAccess", [
       projectId,
+      context?.uuid,
     ]);
-    connection.commit();
     return res;
   } catch (error) {
-    connection.rollback();
     console.log(error);
-  } finally {
-    if (connection) connection.release;
   }
 };
 
