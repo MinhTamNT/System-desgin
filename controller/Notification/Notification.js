@@ -1,18 +1,16 @@
-import { pool } from "../../config/mysqlConfig.js";
-import {
-  GET_NOTIFY_BY_USERID,
-} from "../../Query/notify.js";
+import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import { pubsub } from "../../resolvers/resolvers.js";
 
 const createNotification = async ({
+  idNotify,
   message,
   userTaker,
   userRequest,
-  invitation_idInvitation,
   type,
 }) => {
   try {
     const res = await ExecuteStore("Notification_InsertNewNotify", [
+      idNotify,
       message,
       userTaker,
       userRequest,
@@ -21,8 +19,8 @@ const createNotification = async ({
     const data = res[0][0];
     pubsub.publish("NOTIFICATION_CREATED", {
       notificationCreated: {
-        idNotification: data.idNotify,
-        message: data.message,
+        idNotification: idNotify,
+        message: message,
         is_read: data.isRead,
         createdAt: data.createdAt,
         userTaker: data.User_idUser_taker,
@@ -30,7 +28,6 @@ const createNotification = async ({
         type: data.type,
       },
     });
-
     return {
       idNotification: data.idNotify,
       message: data.message,
@@ -49,27 +46,42 @@ const createNotification = async ({
   }
 };
 
-const getNotificationsByUserId = async (parent, args, context) => {
-  let connection;
+const getNotificationsByUserId = async (
+  parent,
+  { pageIndex, pageSize },
+  context
+) => {
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    const [result] = await connection.query(GET_NOTIFY_BY_USERID, [
-      context?.uuid,
-    ]);
+    const notifications = await ExecuteStore(
+      "Notification_GetUserNotification",
+      [context?.uuid, pageIndex, pageSize]
+    );
+    const dataNotify = Array.isArray(notifications[0])
+      ? notifications[0].map((notification) => (
 
-    const notifications = result.map((notification) => ({
-      ...notification,
-      is_read: Boolean(notification.is_read),
-      invitation_idInvitation: notification.idInvitation,
-    }));
-    console.log("notifications by userId", notifications);
-    return notifications;
+        {
+          idNotification: notification.idNotification,
+          message: notification.message,
+          is_read: Boolean(notification.is_read),
+          createdAt: notification.createdAt,
+          userTaker: notification.User_idUser_taker,
+          userRequest: notification.User_idUser_requested,
+          type: notification.type,
+          invitation_idInvitation: notification.idInvitation,
+        }))
+      : [];
+
+    const totalRow = notifications[0]?.[0]?.TOTALROW || 0;
+    const response = {
+      notifications: dataNotify,
+      pageInfo: {
+        TOTALROW: totalRow,
+      },
+    };
+
+    return response;
   } catch (error) {
-    if (connection) await connection.rollback();
     throw new Error("Error getting notifications: " + error.message);
-  } finally {
-    if (connection) connection.release();
   }
 };
 

@@ -1,6 +1,6 @@
 export const typeDefs = `#graphql
 scalar Date
-union AddUserResponse = User | ProccessObj
+
 
 enum NameRole {
   ROLE_ADMIN
@@ -128,15 +128,20 @@ type ProjectsResponse {
   pageInfo: PageInfo
 }
 
+type NotificationResponse {
+  notifications: [Notification]
+  pageInfo: PageInfo
+}
+
 type UserStatus {
     userId: String
     status: String
   }
-
+union AddUserResponse = User | ProccessObj
 type Query {
   getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
   searchUserByName(searchText:String!): [AddUserResponse]
-  getNotificationsByUserId: [Notification]
+  getNotificationsByUserId(pageIndex: Int, pageSize: Int): NotificationResponse
   getProjectTeams : [Project]
   getConversation: [Conversation]
   getMessageConversationId(conversationId : String): [Message]
@@ -156,8 +161,8 @@ type Mutation {
     createMessage(message:String! , conversationId:ID): Message
     deletedProjectId(projectId:String) : News
     updateProjectAcces( projectId: String!): ProccessObj
-    updateRoleProject( projectId: String! , userId: String! , role: String!): UserProjectAccess
-    removeUserFromProject(projectId: String!, userId: String!): UserProjectAccess
+    updateRoleProject( projectId: String! , userId: String! , role: String!): ProccessObj
+    removeUserFromProject(projectId: String!, userId: String!): ProccessObj
 
 }
 type Subscription {

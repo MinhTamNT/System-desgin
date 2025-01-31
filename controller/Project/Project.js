@@ -1,11 +1,11 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import {
   DELETE_PROJECT_BY_ID,
-  GET_PROJECT_TEAM,
-  UPDATE_USER_ROLE_IN_PROJECT,
+  GET_PROJECT_TEAM
 } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { createNotification } from "../Notification/Notification.js";
+import { v4 as uuidv4 } from "uuid";
 const addProject = async (_, { name, description }, context) => {
   try {
     const result = await ExecuteStore("Project_CreateProject", [
@@ -33,8 +33,6 @@ const getUserProjects = async (
       pageSize,
       context?.uuid,
     ]);
-
-    console.log("Raw result:", result[0]);
 
     const projects = Array.isArray(result[0])
       ? result[0].map((project) => ({
@@ -154,30 +152,29 @@ const updateRoleProjects = async (
   { projectId, role, userId },
   context
 ) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    console.log(projectId, role, userId);
-    const [res] = await connection.query(UPDATE_USER_ROLE_IN_PROJECT, [
+    console.log("role", role, userId, projectId);
+    const res = await ExecuteStore("Project_UpdateRoleMember", [
       role === "VIEWER" ? "ROLE_READ" : "ROLE_WRITE",
       userId,
       projectId,
     ]);
-    connection.commit();
     await createNotification({
+      idNotify: uuidv4(),
       message: "You have been granted access to this project",
       userTaker: userId,
       invitation_idInvitation: "",
       userRequest: context?.uuid,
       type: "STANDARD",
     });
-    return res;
+    const data = res[0][0];
+    console.log("data", data);
+    return {
+      RetCode: data.retCode,
+      RetMessgae: data.retMessage,
+    };
   } catch (error) {
-    connection.rollback();
     console.log(error);
-  } finally {
-    if (connection) connection.release;
   }
 };
 
@@ -186,49 +183,26 @@ const removeUserFromProject = async (
   { projectId, userId },
   context
 ) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-
-    const currentUserId = context?.uuid;
-    const [hostCheck] = await connection.query(
-      "SELECT is_host_user FROM user_has_project WHERE user_idUser = ? AND project_idProject = ?",
-      [currentUserId, projectId]
-    );
-    const isHostUser = hostCheck[0]?.is_host_user
-      ? Boolean(hostCheck[0].is_host_user[0])
-      : false;
-
-    if (hostCheck.length === 0 || isHostUser !== true) {
-      throw new Error(
-        "You do not have permission to remove users from this project."
-      );
-    }
-
-    const [res] = await connection.query(
-      "DELETE FROM user_has_project WHERE user_idUser = ? AND project_idProject = ?",
-      [userId, projectId]
-    );
-
-    await connection.commit();
+    const res = await ExecuteStore("Project_RemoveMemmberInProject", [
+      context?.uuid,
+      userId,
+      projectId,
+    ]);
+    const data = res[0][0];
     await createNotification({
+      idNotify: uuidv4(),
       message: "You have been removed from this project",
       userTaker: userId,
-      invitation_idInvitation: "",
       userRequest: context?.uuid,
-      type: "DELETE",
+      type: "STANDARD",
     });
     return {
-      message: "User has been removed from the project.",
-      affectedRows: res.affectedRows,
+      RetCode: data.retCode,
+      RetMessage: data.retMessage,
     };
   } catch (error) {
-    if (connection) await connection.rollback();
     console.log(error);
-    throw new Error("An error occurred while removing the user.");
-  } finally {
-    if (connection) connection.release();
   }
 };
 

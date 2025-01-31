@@ -15,8 +15,7 @@ import {
   updateUserProjectAccess,
 } from "../controller/Project/Project.js";
 import { addNewUser, SearchUserByName } from "../controller/User/User.js";
-import { pool } from "../config/mysqlConfig.js";
-import { GET_USER_BY_ID } from "../Query/user.js";
+import { ExecuteStore } from "../config/mysqlConfig.js";
 import {
   createConversation,
   getConversation,
@@ -27,7 +26,6 @@ import {
   getMessageConversationId,
 } from "../controller/Message/Message.js";
 import { getActivatyUser } from "../controller/Activaty/Activaty.js";
-import { GraphQLUnionType } from "graphql";
 export const pubsub = new PubSub();
 const NOTIFICATION_CREATED = "NOTIFICATION_CREATED";
 const MESSAGE_CREATED = "MESSAGE_CREATED";
@@ -44,13 +42,12 @@ export const resolvers = {
   },
   Notification: {
     userRequest: async (parent) => {
-      let connection;
       try {
-        connection = await pool.getConnection();
-        const [result] = await connection.query(GET_USER_BY_ID, [
+        const result = await ExecuteStore("User_GetUserByID", [
           parent.userRequest,
         ]);
-        return result;
+        console.log("result User", result);
+        return result[0];
       } catch (error) {
         console.log(error);
         throw new Error("Failed to fetch user");
@@ -76,20 +73,20 @@ export const resolvers = {
     },
   },
   AddUserResponse: {
-  __resolveType(value) {
-    console.log("Resolved value:", value);
-    
-    if (value && value.RetCode !== undefined) {
-      console.log("Resolved to ProccessObj: ", value.RetCode);
-      return "ProccessObj";  // Return the type name as a string
-    }
-    if (value && value.idUser) {
-      console.log("Resolved to User: ", value.idUser);
-      return "User";
-    }
-    console.log("Unable to determine type for value:", value);
-    return null;
-  },
+    __resolveType(value) {
+      console.log("Resolved value:", value);
+
+      if (value && value.RetCode !== undefined) {
+        console.log("Resolved to ProccessObj: ", value.RetCode);
+        return "ProccessObj"; // Return the type name as a string
+      }
+      if (value && value.idUser) {
+        console.log("Resolved to User: ", value.idUser);
+        return "User";
+      }
+      console.log("Unable to determine type for value:", value);
+      return null;
+    },
   },
 
   Mutation: {

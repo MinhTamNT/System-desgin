@@ -63,23 +63,20 @@ const addNewUser = async (
       await pipeline.exec();
     }
 
-    return [
-      {
-        idUser: result[1][0].idUser,
-        profilePicture: result[1][0].profilePicture,
-        email: result[1][0].email,
-        deviceId: deviceId,
-        status: "online",
-      },
-      {
-        retCode: result[0][0].retCode,
-        retMessage: result[0][0].retMessage,
-      },
-    ];
+    if (result && result[0] && result[0][0].idUser) {
+      return [
+        {
+          idUser: result[1][0].idUser,
+          profilePicture: result[1][0].profilePicture,
+          email: result[1][0].email,
+          deviceId: deviceId,
+          status: "online",
+        },
+      ];
+    }
   } catch (error) {
     console.error("Error in addNewUser:", error);
 
-    // Only attempt Redis cleanup if we have a Redis connection
     if (redis && context?.uuid) {
       try {
         const pipeline = redis.pipeline();
@@ -110,7 +107,7 @@ const SearchUserByName = async (_, { searchText }) => {
       const isOnLine = checkOnline.includes(user.idUser);
       return [
         {
-          __typename: 'User', 
+          __typename: "User",
           idUser: user.idUser,
           status: isOnLine,
           profilePicture: user.profilePicture,
@@ -121,7 +118,7 @@ const SearchUserByName = async (_, { searchText }) => {
       const error = result[0][0];
       return [
         {
-          __typename: 'ProccessObj', 
+          __typename: "ProccessObj",
           RetCode: error.retCode,
           RetMessgae: error.retMessage,
         },
@@ -131,14 +128,13 @@ const SearchUserByName = async (_, { searchText }) => {
     console.error("Error searching user:", error);
     return [
       {
-        __typename: 'ProccessObj',
+        __typename: "ProccessObj",
         retCode: -5000,
         retMessage: "Internal server error",
       },
     ];
   }
 };
-
 
 const updateUserStatus = async (_, { userId, idLogon, deviceId }) => {
   try {

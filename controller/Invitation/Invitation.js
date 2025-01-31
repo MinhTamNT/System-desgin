@@ -1,81 +1,42 @@
 import { v4 as uuidv4 } from "uuid";
-import { pool } from "../../config/mysqlConfig.js";
-import {
-  ADD_INIVITATION,
-  GET_INIVITATION_BY_ID,
-  UPDATE_INIVITATION,
-} from "../../Query/invitation.js";
-import { GET_PROJECT_ID, INSERT_USER_PROJECT } from "../../Query/project.js";
 import { sendEmail } from "../../helper/mail.js";
-import { GET_USER_BY_ID } from "../../Query/user.js";
 import { createNotification } from "../Notification/Notification.js";
+import { ExecuteStore } from "../../config/mysqlConfig.js";
 
 const InivitationUser = async (
   _,
   { email_content, projectId, userInvited },
   context
 ) => {
-  let connection;
   try {
-    if (!context?.uuid || !email_content || !projectId || !userInvited) {
-      throw new Error("Missing required parameters");
-    }
-
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-
-    const [resultProject] = await connection.query(GET_PROJECT_ID, [projectId]);
-    if (resultProject.length === 0) {
-      throw new Error("Project not found");
-    }
-
-    const idInivitation = uuidv4();
-
-    const newNotification = await createNotification({
-      message: `You have been invited to join the project ${resultProject[0].name}`,
+    const idNotify = uuidv4();
+    await createNotification({
+      idNotify,
+      message: email_content,
       userTaker: userInvited,
-      invitation_idInvitation: idInivitation,
       userRequest: context?.uuid,
       type: "INVITED",
     });
-
-    const [result] = await connection.query(ADD_INIVITATION, [
-      idInivitation,
-      email_content,
-      "SENT",
+    const newInvitation = await ExecuteStore("Invitation_CreateInvitation", [
       projectId,
-      context?.uuid,
+      email_content,
       userInvited,
-      newNotification?.idNotification,
+      context?.uuid,
+      idNotify,
     ]);
+    const data = newInvitation[0][0];
+    console.log("data", data);
 
-    if (result.affectedRows === 0) {
-      throw new Error("Invitation not added");
-    }
-
-    await connection.commit();
-
-    const [getUser] = await connection.query(GET_USER_BY_ID, [userInvited]);
-    if (getUser.length === 0) {
-      throw new Error("User not found");
-    }
-
-    sendEmail(
-      getUser[0].email,
-      `Invite to ${resultProject[0].name}`,
+    
+    await sendEmail(
+      data.EmailUser,
+      `Invite to ${data.ProjectName}`,
       "text",
-      `You have been invited to join the project ${resultProject[0].name}`
+      `You have been invited to join the project ${data.nameProject}`
     );
-
-    return result[0];
+    return data;
   } catch (error) {
-    // Rollback in case of error
-    if (connection) await connection.rollback();
-    console.error("Error inviting user:", error.message);
-    throw new Error("Error inviting user: " + error.message);
-  } finally {
-    // Release the connection
-    if (connection) connection.release();
+    console.log(error);
   }
 };
 
@@ -84,49 +45,24 @@ const updateInivitation = async (
   { invitation_idInvitation, status },
   context
 ) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    const [result] = await connection.query(UPDATE_INIVITATION, [
+    console.log("updateInivitation", invitation_idInvitation, status);
+    const result = await ExecuteStore("Invitation_UpdateInvitation", [
+      invitation_idInvitation,
+      context?.uuid,
       status,
-      invitation_idInvitation,
     ]);
-
-    await connection.commit();
-    const [getInivite] = await connection.query(GET_INIVITATION_BY_ID, [
-      invitation_idInvitation,
-    ]);
-
-    const [userId] = await connection.query(GET_USER_BY_ID, [
-      getInivite[0].User_idUser_invited,
-    ]);
-
-    if (status === "ACCEPTED") {
-      await connection.query(INSERT_USER_PROJECT, [
-        getInivite[0].User_idUser_invited,
-        getInivite[0].Project_idProject,
-        "ROLE_WRITE",
-        false,
-      ]);
-
-      await createNotification({
-        message: `${userId[0].name} just ${status} your project `,
-        userRequest: context?.uuid,
-        invitation_idInvitation,
-        userTaker: getInivite[0].User_idUser_requested,
-        type: "STANDARD",
-      });
-    } else if (status === "REJECT") {
-      await createNotification({
-        message: `${userId[0].name} just ${status} your project `,
-        userRequest: context?.uuid,
-        invitation_idInvitation,
-        userTaker: userTaker,
-        type: "STANDARD",
-      });
-    }
-    return result;
+    const data = result[0][0];
+    console.log("updateInivitation", data);
+    const type = status === "ACCEPTED" ? "ACCEPTED" : "REJECTED";
+    await createNotification({
+      idNotify: data.idNotify,
+      message: data.message,
+      userTaker: data.UserRequsted,
+      userRequest: context?.uuid,
+      type: type,
+    });
+    return data[0];
   } catch (error) {
     console.log(error);
   }
