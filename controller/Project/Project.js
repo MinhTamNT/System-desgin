@@ -1,20 +1,33 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
-import {
-  DELETE_PROJECT_BY_ID,
-  GET_PROJECT_TEAM
-} from "../../Query/project.js";
-import { liveblocks } from "../../server.mjs";
+import { DELETE_PROJECT_BY_ID, GET_PROJECT_TEAM } from "../../Query/project.js";
+import { InivitationUser } from "../Invitation/Invitation.js";
 import { createNotification } from "../Notification/Notification.js";
 import { v4 as uuidv4 } from "uuid";
-const addProject = async (_, { name, description }, context) => {
+const addProject = async (_, { name, description, listInvite }, context) => {
   try {
+    console.info("addProject", name, description, listInvite);
+    const projectID = uuidv4();
+    console.log("projectID", projectID);
     const result = await ExecuteStore("Project_CreateProject", [
+      projectID,
       name,
       description,
-      null,
       context?.uuid,
     ]);
-    console.log(result);
+    if (listInvite !== null) {
+      const listInviteTmp = listInvite.split(",");
+      listInviteTmp.map(async (user) => {
+        await InivitationUser(
+          null,
+          {
+            email_content: `You have been invited to join the project ${name}`,
+            projectId: projectID,
+            userInvited: user,
+          },
+          context
+        );
+      });
+    }
     return result;
   } catch (error) {
     console.log(error);
@@ -79,37 +92,17 @@ const getProjectTeams = async (parent, args, context) => {
 };
 
 const deletedProject = async (_, { projectId }, context) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-
-    await connection.beginTransaction();
-
-    const [result] = await connection.query(DELETE_PROJECT_BY_ID, [
+    const res = await ExecuteStore("Project_DeleteProject", [
       projectId,
       context?.uuid,
     ]);
-
-    if (result.affectedRows === 0) {
-      await connection.rollback();
-      return {
-        message:
-          "Project not found or you are not authorized to delete this project.",
-      };
-    }
-    await connection.commit();
-
-    await liveblocks.deleteRoom(projectId);
-
-    return { message: "Project deleted successfully." };
+    return {
+      RetCode: res[0][0].retCode,
+      RetMessgae: res[0][0].retMessage,
+    };
   } catch (error) {
-    console.error("Error deleting project:", error);
-
-    if (connection) await connection.rollback();
-
-    return { message: "Error deleting project." };
-  } finally {
-    if (connection) connection.release();
+    console.log(error);
   }
 };
 

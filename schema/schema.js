@@ -154,12 +154,12 @@ type Query {
 
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String , email:String! , TokenUser:String! , expireAt: String!): [AddUserResponse]
-    addProject(name:String!,description:String!): ProccessObj
+    addProject(name:String!,description:String! , listInvite:String): ProccessObj
     InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
     updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
     createConversation(receiverId:String!): Conversation
     createMessage(message:String! , conversationId:ID): Message
-    deletedProjectId(projectId:String) : News
+    deletedProjectId(projectId:String) : ProccessObj
     updateProjectAcces( projectId: String!): ProccessObj
     updateRoleProject( projectId: String! , userId: String! , role: String!): ProccessObj
     removeUserFromProject(projectId: String!, userId: String!): ProccessObj
