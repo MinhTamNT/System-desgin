@@ -35,6 +35,7 @@ async function Authority(req, res, next) {
     req.user = user;
     res.locals.uuid = user?.sub;
     res.locals.token = token;
+    req.token = token
     next();
   } catch (error) {
     if (error) {

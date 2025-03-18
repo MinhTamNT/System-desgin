@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../../helper/mail.js";
 import { createNotification } from "../Notification/Notification.js";
 import { ExecuteStore } from "../../config/mysqlConfig.js";
+import { get } from "http";
 
 const InivitationUser = async (
   _,
@@ -10,6 +11,7 @@ const InivitationUser = async (
 ) => {
   try {
     const idNotify = uuidv4();
+    console.log("InivitationUser", email_content, projectId, userInvited);
     await createNotification({
       idNotify,
       message: email_content,
@@ -25,9 +27,10 @@ const InivitationUser = async (
       idNotify,
     ]);
     const data = newInvitation[0][0];
-    console.log("data", data);
+    const redis = getRedis();
+    await redis.set(`invitation:${data.idInvitation}`, JSON.stringify(data) , "EX", 3600);
+    console.log(`Cached invitation ${idNotify} in Redis`);
 
-    
     await sendEmail(
       data.EmailUser,
       `Invite to ${data.ProjectName}`,

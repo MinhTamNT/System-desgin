@@ -1,11 +1,6 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import { getConnections, getRedis } from "../../config/redis.js";
 import User from "../../model/User.js";
-import { CHECK_USER_EXISTS, SEARCH_USER_NAME } from "../../Query/user.js";
-const checkUserExists = async (name) => {
-  const [rows] = await pool.query(CHECK_USER_EXISTS, [name]);
-  return rows.length > 0;
-};
 
 const REDIS_USER_KEY = (userId) => `user:status:${userId}`;
 const REDIS_ONLINE_USERS = "online:users";
@@ -13,7 +8,7 @@ const CACHE_DURATION = 60;
 
 const addNewUser = async (
   args,
-  { idUser, name, profilePicture, email, tokenUser, expireAt, deviceId },
+  { idUser, name, profilePicture, email, expireAt, deviceId },
   context
 ) => {
   let redis;
