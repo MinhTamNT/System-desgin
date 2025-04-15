@@ -1,5 +1,6 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import { DELETE_PROJECT_BY_ID, GET_PROJECT_TEAM } from "../../Query/project.js";
+import { liveblocks } from "../../server.mjs";
 import { InivitationUser } from "../Invitation/Invitation.js";
 import { createNotification } from "../Notification/Notification.js";
 import { v4 as uuidv4 } from "uuid";
@@ -28,6 +29,25 @@ const addProject = async (_, { name, description, listInvite }, context) => {
         );
       });
     }
+    liveblocks.prepareSession(context?.uuid, {
+      projectInfo: {
+        name: name,
+        description: description,
+      },
+    });
+    await liveblocks.createRoom(projectID, {
+      defaultAccesses: ["room:read", "room:write"], // Default permissions for all users
+      usersAccesses: listInvite
+        ? listInvite.split(",").reduce((acc, user) => {
+            acc[user] = ["room:read", "room:write"]; // Grant specific permissions to each user
+            return acc;
+          }, {})
+        : {}, // If no users are invited, leave this empty
+      metadata: {
+        projectName: name,
+        description: description,
+      },
+    });
     return result;
   } catch (error) {
     console.log(error);
@@ -161,7 +181,6 @@ const updateRoleProjects = async (
       type: "STANDARD",
     });
     const data = res[0][0];
-    console.log("data", data);
     return {
       RetCode: data.retCode,
       RetMessgae: data.retMessage,

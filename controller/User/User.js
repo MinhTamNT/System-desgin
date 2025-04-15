@@ -1,6 +1,7 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import { getConnections, getRedis } from "../../config/redis.js";
 import User from "../../model/User.js";
+import { liveblocks } from "../../server.mjs";
 
 const REDIS_USER_KEY = (userId) => `user:status:${userId}`;
 const REDIS_ONLINE_USERS = "online:users";
@@ -37,7 +38,12 @@ const addNewUser = async (
       email,
       deviceId,
     ]);
-
+    const session = liveblocks.prepareSession(context?.uuid, {
+      userInfo: {
+        name: name,
+        profilePicture: profilePicture,
+      },
+    });
     if (result && context?.uuid) {
       const userData = JSON.stringify({
         userId: context.uuid,
@@ -57,6 +63,18 @@ const addNewUser = async (
 
       await pipeline.exec();
     }
+    liveblocks.identifyUser(
+      {
+        userId: context?.uuid,
+        groupIds: [],
+      },
+      {
+        userInfo: {
+          name: name,
+          profilePicture: profilePicture,
+        },
+      }
+    );
 
     if (result && result[0] && result[0][0].idUser) {
       return [

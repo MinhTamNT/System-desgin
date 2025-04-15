@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import { sendEmail } from "../../helper/mail.js";
 import { createNotification } from "../Notification/Notification.js";
 import { ExecuteStore } from "../../config/mysqlConfig.js";
-import { get } from "http";
+import { liveblocks } from "../../server.mjs";
+import { getRedis } from "../../config/redis.js";
 
 const InivitationUser = async (
   _,
@@ -27,9 +28,6 @@ const InivitationUser = async (
       idNotify,
     ]);
     const data = newInvitation[0][0];
-    const redis = getRedis();
-    await redis.set(`invitation:${data.idInvitation}`, JSON.stringify(data) , "EX", 3600);
-    console.log(`Cached invitation ${idNotify} in Redis`);
 
     await sendEmail(
       data.EmailUser,
@@ -58,6 +56,12 @@ const updateInivitation = async (
     const data = result[0][0];
     console.log("updateInivitation", data);
     const type = status === "ACCEPTED" ? "ACCEPTED" : "REJECTED";
+    if (type === "ACCEPTED") {
+      liveblocks.updateRoom("2b965bc3-bab0-491f-b38b-9814226de082", {
+        userInfo: [data.context?.uuid],
+      });
+    }
+
     await createNotification({
       idNotify: data.idNotify,
       message: data.message,

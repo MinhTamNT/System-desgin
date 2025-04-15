@@ -148,9 +148,37 @@ type Query {
   getUserActivityLog: [ActivityLog] 
   getRecentProjectsWithAccess: [UserProjectAccess]
   getMememberInProject (projectId: String) : [UserProjectAccess]
+   loadComments(projectId: String!): [Comment]
 
 }
+type Comment {
+    id: ID!
+    content: String!
+    x: Float!
+    y: Float!
+    userId: String!
+    createdAt: String!
+    updatedAt: String!
+    replyCount: Int!
+    reactionCount: Int!
+}
 
+type Reply {
+    id: ID!
+    content: String!
+    userId: String!
+    parentCommentId: String!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type Reaction {
+    id: ID!
+    userId: String!
+    commentId: String!
+    reactionType: String!
+    createdAt: String!
+}
 
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String , email:String! , TokenUser:String! , expireAt: String!): [AddUserResponse]
@@ -163,12 +191,22 @@ type Mutation {
     updateProjectAcces( projectId: String!): ProccessObj
     updateRoleProject( projectId: String! , userId: String! , role: String!): ProccessObj
     removeUserFromProject(projectId: String!, userId: String!): ProccessObj
-
+    addComment(content: String!, x: Float!, y: Float!, userId: String!): ProccessObj
+    addReply(content: String!, userId: String!, parentCommentId: String!): ProccessObj
+    addReaction(userId: String!, commentId: String!, reactionType: String!): ProccessObj,
+    updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment
 }
+
 type Subscription {
   notificationCreated: Notification
   messageCreated : Message
   heartbeat: Boolean
   userStatusChanged: UserStatus
+  commentAdded: Comment
+  replyAdded: Reply
+  reactionAdded: Reaction
+  commentPositionUpdated(projectId: String!): Comment
 }
+
+
 `;

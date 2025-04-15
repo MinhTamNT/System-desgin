@@ -26,6 +26,13 @@ import {
   getMessageConversationId,
 } from "../controller/Message/Message.js";
 import { getActivatyUser } from "../controller/Activaty/Activaty.js";
+import {
+  addComment,
+  addReaction,
+  addReply,
+  loadComments,
+  updateCommentPosition,
+} from "../controller/comments/Comment.js";
 export const pubsub = new PubSub();
 const NOTIFICATION_CREATED = "NOTIFICATION_CREATED";
 const MESSAGE_CREATED = "MESSAGE_CREATED";
@@ -39,6 +46,7 @@ export const resolvers = {
     getMessageConversationId: getMessageConversationId,
     getUserActivityLog: getActivatyUser,
     getMememberInProject: getProjectMemember,
+    loadComments: loadComments,
   },
   Notification: {
     userRequest: async (parent) => {
@@ -72,7 +80,7 @@ export const resolvers = {
       return sender;
     },
   },
-  AddUserResponse: {
+AddUserResponse: {
     __resolveType(value) {
       console.log("Resolved value:", value);
 
@@ -100,6 +108,10 @@ export const resolvers = {
     updateProjectAcces: updateUserProjectAccess,
     updateRoleProject: updateRoleProjects,
     removeUserFromProject: removeUserFromProject,
+    addComment: addComment,
+    addReply: addReply,
+    addReaction: addReaction,
+    updateCommentPosition: updateCommentPosition,
   },
   Subscription: {
     notificationCreated: {
@@ -122,6 +134,20 @@ export const resolvers = {
           userId: payload.userId,
           status: payload.status,
         };
+      },
+    },
+    commentAdded: {
+      subscribe: () => pubsub.asyncIterator(["COMMENT_ADDED"]),
+    },
+    replyAdded: {
+      subscribe: () => pubsub.asyncIterator(["REPLY_ADDED"]),
+    },
+    reactionAdded: {
+      subscribe: () => pubsub.asyncIterator(["REACTION_ADDED"]),
+    },
+    commentPositionUpdated: {
+      subscribe: (_, { projectId }) => {
+        return pubsub.asyncIterator([COMMENT_POSITION_UPDATED]);
       },
     },
   },
