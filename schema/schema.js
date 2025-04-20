@@ -137,20 +137,7 @@ type UserStatus {
     userId: String
     status: String
   }
-union AddUserResponse = User | ProccessObj
-type Query {
-  getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
-  searchUserByName(searchText:String!): [AddUserResponse]
-  getNotificationsByUserId(pageIndex: Int, pageSize: Int): NotificationResponse
-  getProjectTeams : [Project]
-  getConversation: [Conversation]
-  getMessageConversationId(conversationId : String): [Message]
-  getUserActivityLog: [ActivityLog] 
-  getRecentProjectsWithAccess: [UserProjectAccess]
-  getMememberInProject (projectId: String) : [UserProjectAccess]
-   loadComments(projectId: String!): [Comment]
 
-}
 type Comment {
     id: ID!
     content: String!
@@ -180,6 +167,38 @@ type Reaction {
     createdAt: String!
 }
 
+type Page {
+  id: ID!
+  name: String!
+  content: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Room {
+  id: ID!
+  pageId: String!
+  pageName: String!
+  createdAt: String!
+}
+
+union AddUserResponse = User | ProccessObj
+type Query {
+  getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
+  searchUserByName(searchText:String!): [AddUserResponse]
+  getNotificationsByUserId(pageIndex: Int, pageSize: Int): NotificationResponse
+  getProjectTeams : [Project]
+  getConversation: [Conversation]
+  getMessageConversationId(conversationId : String): [Message]
+  getUserActivityLog: [ActivityLog] 
+  getRecentProjectsWithAccess: [UserProjectAccess]
+  getMememberInProject (projectId: String) : [UserProjectAccess]
+loadComments(projectId: String!): [Comment],
+getRoomsByProject(projectId: String!): [Room]
+
+}
+
+
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String , email:String! , TokenUser:String! , expireAt: String!): [AddUserResponse]
     addProject(name:String!,description:String! , listInvite:String): ProccessObj
@@ -194,7 +213,8 @@ type Mutation {
     addComment(content: String!, x: Float!, y: Float!, userId: String!): ProccessObj
     addReply(content: String!, userId: String!, parentCommentId: String!): ProccessObj
     addReaction(userId: String!, commentId: String!, reactionType: String!): ProccessObj,
-    updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment
+    updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment,
+    addPageToProject(projectId: String!, name: String!, content: String): Page
 }
 
 type Subscription {

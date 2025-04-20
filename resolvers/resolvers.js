@@ -33,6 +33,10 @@ import {
   loadComments,
   updateCommentPosition,
 } from "../controller/comments/Comment.js";
+import {
+  addPageToProject,
+  getRoomsByProject,
+} from "../controller/Page/Page.js";
 export const pubsub = new PubSub();
 const NOTIFICATION_CREATED = "NOTIFICATION_CREATED";
 const MESSAGE_CREATED = "MESSAGE_CREATED";
@@ -47,6 +51,7 @@ export const resolvers = {
     getUserActivityLog: getActivatyUser,
     getMememberInProject: getProjectMemember,
     loadComments: loadComments,
+    getRoomsByProject: getRoomsByProject,
   },
   Notification: {
     userRequest: async (parent) => {
@@ -80,7 +85,7 @@ export const resolvers = {
       return sender;
     },
   },
-AddUserResponse: {
+  AddUserResponse: {
     __resolveType(value) {
       console.log("Resolved value:", value);
 
@@ -112,6 +117,7 @@ AddUserResponse: {
     addReply: addReply,
     addReaction: addReaction,
     updateCommentPosition: updateCommentPosition,
+    addPageToProject: addPageToProject,
   },
   Subscription: {
     notificationCreated: {

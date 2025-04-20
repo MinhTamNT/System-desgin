@@ -1,5 +1,5 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
-import { DELETE_PROJECT_BY_ID, GET_PROJECT_TEAM } from "../../Query/project.js";
+import {  GET_PROJECT_TEAM } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { InivitationUser } from "../Invitation/Invitation.js";
 import { createNotification } from "../Notification/Notification.js";
@@ -36,13 +36,13 @@ const addProject = async (_, { name, description, listInvite }, context) => {
       },
     });
     await liveblocks.createRoom(projectID, {
-      defaultAccesses: ["room:read", "room:write"], // Default permissions for all users
+      defaultAccesses: ["room:read", "room:write"],
       usersAccesses: listInvite
         ? listInvite.split(",").reduce((acc, user) => {
-            acc[user] = ["room:read", "room:write"]; // Grant specific permissions to each user
+            acc[user] = ["room:read", "room:write"]; 
             return acc;
           }, {})
-        : {}, // If no users are invited, leave this empty
+        : {}, 
       metadata: {
         projectName: name,
         description: description,
