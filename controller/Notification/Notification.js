@@ -7,6 +7,8 @@ const createNotification = async ({
   userTaker,
   userRequest,
   type,
+  invitation_idInvitation,
+  projectId,
 }) => {
   try {
     const res = await ExecuteStore("Notification_InsertNewNotify", [
@@ -15,6 +17,7 @@ const createNotification = async ({
       userTaker,
       userRequest,
       type,
+      projectId
     ]);
     const data = res[0][0];
     pubsub.publish("NOTIFICATION_CREATED", {
@@ -23,19 +26,24 @@ const createNotification = async ({
         message: message,
         is_read: data.isRead,
         createdAt: data.createdAt,
-        userTaker: data.User_idUser_taker,
-        userRequest: data.User_idUser_requested,
+        userTaker: data.User_idUser_receiver,
+        userRequest: data.User_idUser_sender,
         type: data.type,
+        invitation_idInvitation: invitation_idInvitation,
       },
     });
+
+    console.log("createNotification", data);
+ 
     return {
       idNotification: data.idNotify,
       message: data.message,
       is_read: data.isRead,
       createdAt: data.createdAt,
-      userTaker: data.User_idUser_taker,
+      userTaker: data.User_idUser_receiver,
       userRequest: data.User_idUser_requested,
       type: data.type,
+      invitation_idInvitation: invitation_idInvitation,
     };
   } catch (error) {
     console.log(error);
@@ -64,8 +72,8 @@ const getNotificationsByUserId = async (
           message: notification.message,
           is_read: Boolean(notification.is_read),
           createdAt: notification.createdAt,
-          userTaker: notification.User_idUser_taker,
-          userRequest: notification.User_idUser_requested,
+          userTaker: notification.User_idUser_receiver,
+          userRequest: notification.User_idUser_sender,
           type: notification.type,
           invitation_idInvitation: notification.idInvitation,
         }))

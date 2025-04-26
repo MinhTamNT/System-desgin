@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import { sendEmail } from "../../helper/mail.js";
 import { createNotification } from "../Notification/Notification.js";
 import { ExecuteStore } from "../../config/mysqlConfig.js";
-import { liveblocks } from "../../server.mjs";
-import { getRedis } from "../../config/redis.js";
 
 const InivitationUser = async (
   _,
@@ -12,6 +9,7 @@ const InivitationUser = async (
 ) => {
   try {
     const idNotify = uuidv4();
+    const idInvitation = uuidv4();
     console.log("InivitationUser", email_content, projectId, userInvited);
     await createNotification({
       idNotify,
@@ -19,22 +17,19 @@ const InivitationUser = async (
       userTaker: userInvited,
       userRequest: context?.uuid,
       type: "INVITED",
+      invitation_idInvitation: idInvitation,
+      projectId: projectId,
     });
-    const newInvitation = await ExecuteStore("Invitation_CreateInvitation", [
+
+   await ExecuteStore("Invitation_CreateInvitation", [
       projectId,
       email_content,
       userInvited,
       context?.uuid,
       idNotify,
+      idInvitation,
     ]);
-    const data = newInvitation[0][0];
-
-    await sendEmail(
-      data.EmailUser,
-      `Invite to ${data.ProjectName}`,
-      "text",
-      `You have been invited to join the project ${data.nameProject}`
-    );
+    
     return data;
   } catch (error) {
     console.log(error);
@@ -56,14 +51,13 @@ const updateInivitation = async (
     const data = result[0][0];
     console.log("updateInivitation", data);
     const type = status === "ACCEPTED" ? "ACCEPTED" : "REJECTED";
-    if (type === "ACCEPTED") {
-      liveblocks.updateRoom("2b965bc3-bab0-491f-b38b-9814226de082", {
-        userInfo: [data.context?.uuid],
-      });
-    }
+   
 
+    console.log("createNotification", data);
+    
+    const idNotify = uuidv4();
     await createNotification({
-      idNotify: data.idNotify,
+      idNotify,
       message: data.message,
       userTaker: data.UserRequsted,
       userRequest: context?.uuid,

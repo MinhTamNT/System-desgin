@@ -35,19 +35,7 @@ const addProject = async (_, { name, description, listInvite }, context) => {
         description: description,
       },
     });
-    await liveblocks.createRoom(projectID, {
-      defaultAccesses: ["room:read", "room:write"],
-      usersAccesses: listInvite
-        ? listInvite.split(",").reduce((acc, user) => {
-            acc[user] = ["room:read", "room:write"]; 
-            return acc;
-          }, {})
-        : {}, 
-      metadata: {
-        projectName: name,
-        description: description,
-      },
-    });
+ 
     return result;
   } catch (error) {
     console.log(error);
