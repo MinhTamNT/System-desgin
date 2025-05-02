@@ -1,17 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "../Notification/Notification.js";
 import { ExecuteStore } from "../../config/mysqlConfig.js";
-
+import { sendEmail } from "../../helper/mail.js";
 const InivitationUser = async (
   _,
-  { email_content, projectId, userInvited },
+  { email_content, projectId, userInvited},
   context
 ) => {
   try {
     const idNotify = uuidv4();
     const idInvitation = uuidv4();
+    let emailUser = "";
     console.log("InivitationUser", email_content, projectId, userInvited);
-    await createNotification({
+    const check = await createNotification({
       idNotify,
       message: email_content,
       userTaker: userInvited,
@@ -20,19 +21,38 @@ const InivitationUser = async (
       invitation_idInvitation: idInvitation,
       projectId: projectId,
     });
-
-   await ExecuteStore("Invitation_CreateInvitation", [
-      projectId,
-      email_content,
-      userInvited,
-      context?.uuid,
-      idNotify,
-      idInvitation,
-    ]);
-    
-    return data;
+    if(check){
+      if(check.retCode < 0){
+        return {
+          RetCode: check.retCode,
+          RetMessage: check.retMessage,
+        }
+      }
+      else {
+       const result = await ExecuteStore("Invitation_CreateInvitation", [
+          projectId,
+          email_content,
+          userInvited,
+          context?.uuid,
+          idNotify,
+          idInvitation,
+      ]);
+      console.log("userInvited", userInvited);
+      const data = result[0][0];
+      emailUser = data.retMessage;
+      }
+      await sendEmail(emailUser, "Invitation to join project", email_content, "You have been invited to join the project");
+    }
+    return {
+      RetCode: 0,
+      RetMessage: "Invitation sent successfully",
+    };
   } catch (error) {
     console.log(error);
+    return {
+      RetCode: -1,
+      RetMessage: "Invitation sent failed",
+    };
   }
 };
 

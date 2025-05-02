@@ -206,6 +206,21 @@ const removeUserFromProject = async (
   }
 };
 
+const checkProject = async (parent, { projectId }, context) => {
+  try {
+    console.log("checkProject", projectId, context?.uuid);
+    const res = await ExecuteStore("Project_CheckMember", [ context?.uuid, projectId]);
+    const data = res[0][0];
+    console.log("checkProject", data);
+    return {
+      RetCode: data.retCode,
+      RetMessage: data.retMessage,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export {
   addProject,
   deletedProject,
@@ -215,4 +230,5 @@ export {
   getProjectMemember,
   updateRoleProjects,
   removeUserFromProject,
+  checkProject,
 };

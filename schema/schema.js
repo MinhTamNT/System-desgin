@@ -193,8 +193,9 @@ type Query {
   getUserActivityLog: [ActivityLog] 
   getRecentProjectsWithAccess: [UserProjectAccess]
   getMememberInProject (projectId: String) : [UserProjectAccess]
-loadComments(projectId: String!): [Comment],
-getRoomsByProject(projectId: String!): [Room]
+  loadComments(projectId: String!): [Comment],
+  getRoomsByProject(projectId: String!): [Room],
+  checkProject (projectId: String!): ProccessObj
 
 }
 
@@ -214,7 +215,8 @@ type Mutation {
     addReply(content: String!, userId: String!, parentCommentId: String!): ProccessObj
     addReaction(userId: String!, commentId: String!, reactionType: String!): ProccessObj,
     updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment,
-    addPageToProject(projectId: String!, name: String!, content: String): Page
+    addPageToProject(projectId: String!, name: String!, content: String): Page,
+    
 }
 
 type Subscription {

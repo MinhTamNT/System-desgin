@@ -6,6 +6,7 @@ import {
 import { getNotificationsByUserId } from "../controller/Notification/Notification.js";
 import {
   addProject,
+  checkProject,
   deletedProject,
   getProjectMemember,
   getProjectTeams,
@@ -52,6 +53,7 @@ export const resolvers = {
     getMememberInProject: getProjectMemember,
     loadComments: loadComments,
     getRoomsByProject: getRoomsByProject,
+    checkProject: checkProject,
   },
   Notification: {
     userRequest: async (parent) => {
