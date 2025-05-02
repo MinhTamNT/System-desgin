@@ -1,4 +1,5 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
+import { REUEST_JOIN_PROJECT } from "../../helper/mail.js";
 import {  GET_PROJECT_TEAM } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { InivitationUser } from "../Invitation/Invitation.js";
@@ -221,6 +222,25 @@ const checkProject = async (parent, { projectId }, context) => {
   }
 };
 
+const sendProjectAccessRequestEmail = async (parent, { projectId , message , nameRequest ,imageRequest , emailRequest }, context) => {
+  try {
+    const res = await ExecuteStore("Project_RequestJoin", [
+      projectId,
+    ]);
+    const data = res[0][0];
+    console.log("sendProjectAccessRequestEmail", data);
+    console.log("sendProjectAccessRequestEmail", projectId , message , nameRequest);
+    const subject = "Request to join project";
+    await REUEST_JOIN_PROJECT(data.email , subject , data.nameUserHost , {name : nameRequest , email : emailRequest , message : message} , "");
+    return {
+      RetCode: 1,
+      RetMessage: "Gửi thành công",
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export {
   addProject,
   deletedProject,
@@ -231,4 +251,5 @@ export {
   updateRoleProjects,
   removeUserFromProject,
   checkProject,
+  sendProjectAccessRequestEmail,
 };

@@ -182,6 +182,8 @@ type Room {
   createdAt: String!
 }
 
+
+
 union AddUserResponse = User | ProccessObj
 type Query {
   getUserProjects(pageIndex: Int, pageSize: Int , nameProject:String): ProjectsResponse
@@ -196,7 +198,7 @@ type Query {
   loadComments(projectId: String!): [Comment],
   getRoomsByProject(projectId: String!): [Room],
   checkProject (projectId: String!): ProccessObj
-
+  
 }
 
 
@@ -216,6 +218,7 @@ type Mutation {
     addReaction(userId: String!, commentId: String!, reactionType: String!): ProccessObj,
     updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment,
     addPageToProject(projectId: String!, name: String!, content: String): Page,
+    sendProjectAccessRequestEmail(projectId: String!, message: String!, nameRequest: String!, imageRequest: String! ,emailRequest:String!): ProccessObj
     
 }
 
