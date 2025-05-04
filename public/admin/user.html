@@ -6,63 +6,90 @@
     <title>Admin Panel - User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="./css/index.css" />
   </head>
   <body class="bg-gray-100 min-h-screen flex">
     <aside
-      class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
+      class="sidebar w-72 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-xl z-10 overflow-y-auto"
     >
-      <h2 class="text-2xl font-bold text-center mb-8 text-blue-400">
-        Admin Panel
-      </h2>
+      <div class="flex items-center justify-center mb-8">
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">
+          Admin Panel
+        </h2>
+      </div>
       <nav class="flex-grow">
         <ul>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./index.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Dashboard</a
+              class="active-nav-item flex items-center py-3 px-4 rounded-lg transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+              Dashboard
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./user.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >User Management</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+              User Management
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./project.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Projects</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Projects
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./inviation.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Invitations</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Invitations
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./notification.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Notifications</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              Notifications
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./login.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Logout</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              Logout
+            </a>
           </li>
         </ul>
       </nav>
-      <div class="mt-auto">
+      <div class="mt-auto pt-6 border-t border-gray-700">
         <p class="text-sm text-gray-400 text-center">
-          &copy; 2024 Company Pixel App
+          &copy; 2024 Pixel App
         </p>
       </div>
     </aside>
@@ -125,76 +152,281 @@
 
     <script>
       let userIdToDelete = null;
-
+    
+      document.addEventListener("DOMContentLoaded", function() {
+        initUI();
+        fetchUsers();
+      });
+    
+      // Khởi tạo các thành phần UI cần thiết
+      function initUI() {
+        // Thêm loader nếu chưa có
+        if (!document.getElementById("loader")) {
+          const loader = document.createElement("div");
+          loader.id = "loader";
+          loader.className = "fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden";
+          loader.innerHTML = `
+            <div class="bg-white p-5 rounded-lg shadow-lg flex items-center space-x-3">
+              <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Loading...</span>
+            </div>
+          `;
+          document.body.appendChild(loader);
+        }
+    
+        // Cập nhật modal xác nhận xóa
+        const confirmModal = document.getElementById("confirmationModal");
+        if (confirmModal) {
+          // Kiểm tra nếu modal cần được nâng cấp giao diện
+          if (!confirmModal.querySelector('.bg-red-600')) {
+            confirmModal.innerHTML = `
+              <div class="bg-white rounded-xl shadow-lg max-w-md w-full">
+                <div class="bg-red-600 text-white p-4 rounded-t-xl flex justify-between items-center">
+                  <h5 class="text-lg font-semibold">Confirm Delete</h5>
+                  <button class="text-white hover:text-gray-200" onclick="hideDeleteModal()">
+                    &times;
+                  </button>
+                </div>
+                <div class="p-5">
+                  <p id="confirmDeleteMessage" class="text-gray-700 mb-4">
+                    Are you sure you want to delete this user? This action cannot be undone.
+                  </p>
+                  <div class="flex justify-end space-x-3">
+                    <button
+                      class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+                      id="cancelDelete"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      id="confirmDelete"
+                      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            // Cập nhật event listeners
+            document.getElementById("confirmDelete").addEventListener("click", deleteUser);
+            document.getElementById("cancelDelete").addEventListener("click", hideDeleteModal);
+          }
+        }
+      }
+    
       async function fetchUsers() {
+        // Hiển thị loading indicator
+        const loader = document.getElementById("loader");
+        if (loader) loader.classList.remove("hidden");
+        
         try {
           const response = await axios.get("/v1/api/users");
           const users = response.data;
-
+    
           const userList = document.getElementById("user-list");
           userList.innerHTML = "";
-
+    
+          if (users.length === 0) {
+            // Hiển thị thông báo không có người dùng
+            const tableBody = userList.closest('table').parentNode;
+            tableBody.innerHTML = `
+              <div class="flex flex-col items-center justify-center py-12 bg-white rounded-xl shadow-md">
+                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <p class="text-gray-600 text-lg">No users found</p>
+              </div>
+            `;
+            return;
+          }
+    
+          // Cải thiện bảng danh sách người dùng
           users.forEach((user) => {
             const row = document.createElement("tr");
-            row.classList.add("border-b", "border-gray-200");
+            row.dataset.userId = user.idUser;
+            row.className = "hover:bg-gray-50 transition duration-200 border-b border-gray-200";
+            
             row.innerHTML = `
-              <td class="py-3 px-6">${user.name}</td>
-              <td class="py-3 px-6">${user.email}</td>
-              <td class="py-3 px-6">
-                <a href="#" class="text-red-500 hover:underline" onclick="showDeleteModal('${user.idUser}')">Delete</a>
+              <td class="py-4 px-6">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mr-3">
+                    <span class="text-primary-600 font-semibold">${user.name.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-800">${user.name}</p>
+                    <p class="text-sm text-gray-500">${user.roleName || 'User'}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="py-4 px-6 text-gray-600">${user.email}</td>
+              <td class="py-4 px-6">
+                <button class="delete-user bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-100 transition duration-300 flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Delete
+                </button>
               </td>
             `;
+            
+            // Thêm event listener cho nút xóa
+            row.querySelector('.delete-user').addEventListener('click', () => {
+              showDeleteModal(user.idUser, user.name);
+            });
+            
             userList.appendChild(row);
           });
         } catch (error) {
           console.error("Error fetching users:", error);
+          showToast("Error fetching users", "error");
+          
+          // Hiển thị thông báo lỗi
+          const userList = document.getElementById("user-list");
+          const tableBody = userList.closest('table').parentNode;
+          tableBody.innerHTML = `
+            <div class="bg-red-50 text-red-500 p-4 rounded-xl shadow-md">
+              <p class="font-medium">Error loading users</p>
+              <p class="text-sm">${error.message || "Unknown error"}</p>
+            </div>
+          `;
+        } finally {
+          // Ẩn loading indicator
+          if (loader) loader.classList.add("hidden");
         }
       }
-
-      function showDeleteModal(userId) {
+    
+      function showDeleteModal(userId, userName = '') {
         userIdToDelete = userId;
-        document.getElementById("confirmationModal").classList.remove("hidden"); // Show the modal
+        
+        // Cập nhật thông báo nếu có tên người dùng
+        if (userName) {
+          const confirmMessage = document.getElementById("confirmDeleteMessage");
+          if (confirmMessage) {
+            confirmMessage.textContent = `Are you sure you want to delete the user "${userName}"? This action cannot be undone.`;
+          }
+        }
+        
+        // Hiển thị modal
+        const modal = document.getElementById("confirmationModal");
+        modal.classList.remove("hidden");
+        
+        // Thêm hiệu ứng mượt mà khi hiện modal
+        setTimeout(() => {
+          const modalContent = modal.querySelector('.bg-white');
+          if (modalContent) {
+            modalContent.classList.add('modal-enter-active');
+          }
+        }, 10);
       }
-
+    
       function hideDeleteModal() {
-        document.getElementById("confirmationModal").classList.add("hidden"); // Hide the modal
-        userIdToDelete = null;
+        const modal = document.getElementById("confirmationModal");
+        
+        // Xóa hiệu ứng trước khi ẩn
+        const modalContent = modal.querySelector('.bg-white');
+        if (modalContent) {
+          modalContent.classList.remove('modal-enter-active');
+        }
+        
+        // Ẩn modal sau hiệu ứng
+        setTimeout(() => {
+          modal.classList.add("hidden");
+          userIdToDelete = null;
+        }, 200);
       }
-
+    
       async function deleteUser() {
+        if (!userIdToDelete) return;
+        
+        // Hiển thị loading
+        const loader = document.getElementById("loader");
+        if (loader) loader.classList.remove("hidden");
+        
         try {
-          // Send delete request to the API using fetch
-          const response = await fetch(`/v1/api/users/${userIdToDelete}`, {
-            method: "DELETE",
-          });
-
-          if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-          }
-
-          const userRow = document.querySelector(
-            `tr[data-user-id="${userIdToDelete}"]`
-          );
-          if (userRow) {
-            userRow.remove();
-          }
-
+          // Sử dụng axios thay vì fetch để nhất quán với các phương thức khác
+          const response = await axios.delete(`/v1/api/users/${userIdToDelete}`);
+          
+          // Hiển thị thông báo thành công
+          showToast("User deleted successfully", "success");
+          
+          // Đóng modal và tải lại danh sách người dùng
           hideDeleteModal();
           fetchUsers();
         } catch (error) {
           console.error("Error deleting user:", error);
+          showToast("Error deleting user", "error");
           hideDeleteModal();
+        } finally {
+          if (loader) loader.classList.add("hidden");
         }
       }
-
-      document
-        .getElementById("confirmDelete")
-        .addEventListener("click", deleteUser);
-      document
-        .getElementById("cancelDelete")
-        .addEventListener("click", hideDeleteModal);
-
-      fetchUsers();
+      
+      // Hàm hiển thị toast message
+      function showToast(message, type = "info") {
+        // Tạo toast container nếu chưa có
+        let toastContainer = document.getElementById("toast-container");
+        if (!toastContainer) {
+          toastContainer = document.createElement("div");
+          toastContainer.id = "toast-container";
+          toastContainer.className = "fixed bottom-4 right-4 z-50";
+          document.body.appendChild(toastContainer);
+        }
+        
+        // Màu sắc dựa trên loại
+        let bgColor, textColor, icon;
+        switch (type) {
+          case "success":
+            bgColor = "bg-green-500";
+            textColor = "text-white";
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>`;
+            break;
+          case "error":
+            bgColor = "bg-red-500";
+            textColor = "text-white";
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>`;
+            break;
+          default:
+            bgColor = "bg-blue-500";
+            textColor = "text-white";
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>`;
+        }
+        
+        // Tạo toast
+        const toast = document.createElement("div");
+        toast.className = `${bgColor} ${textColor} flex items-center p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 ease-out mb-2`;
+        toast.innerHTML = `
+          ${icon}
+          <span>${message}</span>
+        `;
+        
+        // Thêm vào container
+        toastContainer.appendChild(toast);
+        
+        // Ẩn sau 3 giây
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2");
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 300);
+        }, 3000);
+      }
+    
+      window.showDeleteModal = showDeleteModal;
+      window.hideDeleteModal = hideDeleteModal;
+      window.deleteUser = deleteUser;
     </script>
   </body>
 </html>

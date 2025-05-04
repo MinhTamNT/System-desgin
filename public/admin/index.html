@@ -6,268 +6,794 @@
     <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      .sidebar::-webkit-scrollbar {
-        width: 8px;
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/index.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              poppins: ['Poppins', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                50: '#f5f3ff',
+                100: '#ede9fe',
+                200: '#ddd6fe',
+                300: '#c4b5fd',
+                400: '#a78bfa',
+                500: '#8b5cf6',
+                600: '#7c3aed',
+                700: '#6d28d9',
+                800: '#5b21b6',
+                900: '#4c1d95',
+              },
+            },
+          },
+        },
       }
-      .sidebar::-webkit-scrollbar-thumb {
-        background-color: #4a5568;
-        border-radius: 10px;
+    </script>
+    <style>
+      .chart-container {
+        height: 320px;
+        position: relative;
+      }
+      .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .modal-enter-active {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+      .modal-content {
+        transform: scale(0.95) translateY(-10px);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      .gradient-header {
+        background-image: linear-gradient(to right, #6366F1, #8B5CF6);
+      }
+      .active-nav-item {
+        background-color: rgba(124, 58, 237, 0.2);
+        color: #fff;
       }
     </style>
   </head>
-  <body class="bg-gray-100 min-h-screen flex">
-    <aside
-      class="sidebar w-64 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-lg"
-    >
-      <h2 class="text-2xl font-bold text-center mb-8 text-blue-400">
-        Admin Panel
-      </h2>
+  <body class="bg-gray-50 min-h-screen flex font-poppins">
+    <!-- Sidebar -->
+    <aside class="sidebar w-72 bg-gray-900 text-gray-200 p-6 flex flex-col h-screen fixed shadow-xl z-10 overflow-y-auto">
+      <div class="flex items-center justify-center mb-8">
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">
+          Admin Panel
+        </h2>
+      </div>
       <nav class="flex-grow">
         <ul>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./index.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Dashboard</a
+              class="active-nav-item flex items-center py-3 px-4 rounded-lg transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+              Dashboard
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./user.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >User Management</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+              User Management
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./project.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Projects</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Projects
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./inviation.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Invitations</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Invitations
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./notification.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Notifications</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              Notifications
+            </a>
           </li>
-          <li class="mb-4">
+          <li class="mb-3">
             <a
               href="./login.html"
-              class="block py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-300 active:bg-gray-800"
-              >Logout</a
+              class="flex items-center py-3 px-4 rounded-lg hover:bg-gray-800 transition duration-300"
             >
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              Logout
+            </a>
           </li>
         </ul>
       </nav>
-      <div class="mt-auto">
+      <div class="mt-auto pt-6 border-t border-gray-700">
         <p class="text-sm text-gray-400 text-center">
-          &copy; 2024 Company Pixel App
+          &copy; 2024 Pixel App
         </p>
       </div>
     </aside>
 
-    <div class="flex-1 ml-64 p-8">
-      <header
-        class="flex items-center justify-between py-5 bg-white shadow-lg rounded-md px-6 mb-8"
-      >
-        <h1 class="text-3xl font-semibold text-gray-800">Dashboard</h1>
-        <div class="flex items-center space-x-4">
-          <span class="text-gray-600 text-lg">Welcome, Admin</span>
+    <!-- Main Content -->
+    <div class="flex-1 ml-72 p-8">
+      <header class="mb-8">
+        <div class="gradient-header shadow-lg rounded-xl p-6 flex items-center justify-between">
+          <h1 class="text-3xl font-bold text-white">Dashboard</h1>
+          <div class="flex items-center space-x-4">
+            <div class="bg-white bg-opacity-20 rounded-full px-4 py-2 flex items-center">
+              <svg class="h-5 w-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-white font-medium">Welcome, Admin</span>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main>
-        <div class="w-full max-w-4xl mb-8">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">
-            Access Statistics
-          </h2>
-          <div class="bg-white shadow-md rounded-lg p-4">
-            <canvas id="combinedChart"></canvas>
+      <!-- User Statistics Section -->
+      <div class="w-full mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">User Activity</h2>
+          <div class="flex space-x-2">
+            <button id="period-day" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Daily</button>
+            <button id="period-week" class="px-4 py-2 bg-primary-600 rounded-lg text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Weekly</button>
+            <button id="period-month" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">Monthly</button>
           </div>
         </div>
+        
+        <!-- User Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+            <div class="flex items-center">
+              <div class="rounded-full bg-primary-100 p-3 mr-4">
+                <svg class="h-8 w-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-gray-500 text-sm font-medium">Unique Users</h3>
+                <p class="text-2xl font-bold text-gray-800" id="unique-users-count">--</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+            <div class="flex items-center">
+              <div class="rounded-full bg-green-100 p-3 mr-4">
+                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-gray-500 text-sm font-medium">Online Users</h3>
+                <p class="text-2xl font-bold text-gray-800" id="online-users-count">--</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+            <div class="flex items-center">
+              <div class="rounded-full bg-blue-100 p-3 mr-4">
+                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-gray-500 text-sm font-medium">New Users</h3>
+                <p class="text-2xl font-bold text-gray-800" id="new-users-count">--</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- User Activity Chart -->
+        <div class="bg-white shadow-md rounded-xl p-6 chart-container" style="height: 300px;">
+          <canvas id="userActivityChart"></canvas>
+        </div>
+      </div>
 
-        <div class="w-full max-w-4xl mb-8">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">
-            User Access Statistics
-          </h2>
-          <div class="bg-white shadow-md rounded-lg p-4">
-            <canvas id="accessStatisticsChart"></canvas>
+     <!-- Storage Statistics -->
+    <div class="w-full mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Project Storage Statistics</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+          <div class="flex items-center">
+            <div class="rounded-full bg-indigo-100 p-3 mr-4">
+              <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-gray-500 text-sm font-medium">Total Projects</h3>
+              <p class="text-2xl font-bold text-gray-800" id="total-projects-count">--</p>
+            </div>
           </div>
         </div>
-      </main>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+          <div class="flex items-center">
+            <div class="rounded-full bg-purple-100 p-3 mr-4">
+              <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-gray-500 text-sm font-medium">Total Storage</h3>
+              <p class="text-2xl font-bold text-gray-800" id="total-storage-size">--</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+          <div class="flex items-center">
+            <div class="rounded-full bg-pink-100 p-3 mr-4">
+              <svg class="h-8 w-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-gray-500 text-sm font-medium">Average Size</h3>
+              <p class="text-2xl font-bold text-gray-800" id="average-storage-size">--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white shadow-md rounded-xl p-6 chart-container" style="height: 500px;">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Project Size Distribution</h3>
+          <canvas id="projectSizeChart"></canvas>
+        </div>
+        
+        <div class="bg-white shadow-md rounded-xl p-6 chart-container" style="height: 500px;">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Storage by Project</h3>
+          <canvas id="storageByProjectChart"></canvas>
+        </div>
+      </div>
+    </div>
     </div>
 
     <script>
-      // Combined Chart: Access by User Role and Project
-      const ctxCombined = document
-        .getElementById("combinedChart")
-        .getContext("2d");
-      const combinedChart = new Chart(ctxCombined, {
-        type: "line",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "ROLE_READ",
-              backgroundColor: "rgba(75, 192, 192, 0.2)",
-              borderColor: "rgba(75, 192, 192, 1)",
-              borderWidth: 2,
-              fill: true,
-              tension: 0.4,
-              data: [],
-            },
-            {
-              label: "ROLE_WRITE",
-              backgroundColor: "rgba(255, 159, 64, 0.2)",
-              borderColor: "rgba(255, 159, 64, 1)",
-              borderWidth: 2,
-              fill: true,
-              tension: 0.4,
-              data: [],
-            },
-            {
-              label: "Total Project Accesses",
-              backgroundColor: "rgba(153, 102, 255, 0.2)",
-              borderColor: "rgba(153, 102, 255, 1)",
-              borderWidth: 2,
-              fill: true,
-              tension: 0.4,
-              data: [],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
-          plugins: {
-            tooltip: {
-              mode: "index",
-              intersect: false,
-            },
-          },
-        },
-      });
+      // Utility function to format bytes to human readable format
+      function bytesToSize(bytes) {
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+        if (bytes === 0) return "0 Bytes";
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+      }
+      
+      let userActivityChart = null;
 
-      function updateCombinedChart() {
-        fetch("/v1/access-statistics")
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-
-            const users = {};
-            const projects = {};
-
-            data.forEach((entry) => {
-              if (!users[entry.user_name]) {
-                users[entry.user_name] = { ROLE_READ: 0, ROLE_WRITE: 0 };
-              }
-              users[entry.user_name][entry.access_type]++;
-
-              if (!projects[entry.project_name]) {
-                projects[entry.project_name] = 0;
-              }
-              projects[entry.project_name] += entry.project_access_count;
-            });
-
-            // Prepare data for Chart
-            const userNames = Object.keys(users);
-            const roleReadCounts = userNames.map(
-              (user) => users[user].ROLE_READ
-            );
-            const roleWriteCounts = userNames.map(
-              (user) => users[user].ROLE_WRITE
-            );
-            const projectNames = Object.keys(projects);
-            const projectAccessCounts = projectNames.map(
-              (project) => projects[project]
-            );
-
-            // Combine labels for x-axis
-            const combinedLabels = [...userNames, ...projectNames];
-
-            // Update Chart data
-            combinedChart.data.labels = combinedLabels;
-            combinedChart.data.datasets[0].data = [
-              ...roleReadCounts,
-              ...Array(projectNames.length).fill(0),
-            ];
-            combinedChart.data.datasets[1].data = [
-              ...roleWriteCounts,
-              ...Array(projectNames.length).fill(0),
-            ];
-            combinedChart.data.datasets[2].data = [
-              ...Array(userNames.length).fill(0),
-              ...projectAccessCounts,
-            ];
-            combinedChart.update();
-          })
-          .catch((error) =>
-            console.error("Error fetching access statistics:", error)
-          );
+      async function loadUserStats(period = 'week') {
+        try {
+          // Hiển thị loading...
+          document.getElementById('unique-users-count').innerText = '...';
+          document.getElementById('online-users-count').innerText = '...';
+          document.getElementById('new-users-count').innerText = '...';
+          
+          // Hiển thị spinner nếu có
+          const loader = document.getElementById("loader");
+          if (loader) loader.classList.remove("hidden");
+          
+          // Cập nhật trạng thái nút
+          document.getElementById('period-day').classList.remove('bg-primary-600', 'text-white');
+          document.getElementById('period-day').classList.add('bg-white', 'border', 'text-gray-700');
+          
+          document.getElementById('period-week').classList.remove('bg-primary-600', 'text-white');
+          document.getElementById('period-week').classList.add('bg-white', 'border', 'text-gray-700');
+          
+          document.getElementById('period-month').classList.remove('bg-primary-600', 'text-white');
+          document.getElementById('period-month').classList.add('bg-white', 'border', 'text-gray-700');
+          
+          // Đánh dấu nút đang chọn
+          document.getElementById(`period-${period}`).classList.remove('bg-white', 'border', 'text-gray-700');
+          document.getElementById(`period-${period}`).classList.add('bg-primary-600', 'text-white');
+          
+          // Gọi API
+          const response = await fetch(`/v1/api/user-statistics?period=${period}`);
+          const data = await response.json();
+          console.log("API Response:", data);
+          
+          // Kiểm tra dữ liệu trước khi sử dụng
+          if (data && data.overview) {
+            // Cập nhật thông tin tổng quan
+            document.getElementById('unique-users-count').innerText = data.overview.unique_users || 0;
+            document.getElementById('online-users-count').innerText = data.overview.currently_online || 0;
+            document.getElementById('new-users-count').innerText = data.overview.new_users || 0;
+          } else {
+            console.warn("Missing or invalid data structure from API");
+            document.getElementById('unique-users-count').innerText = '0';
+            document.getElementById('online-users-count').innerText = '0';
+            document.getElementById('new-users-count').innerText = '0';
+          }
+          
+          // Nếu không có dữ liệu, tạo dữ liệu mẫu để kiểm tra biểu đồ
+          const mockTimeline = period === 'day' 
+            ? [{time_slot: 9, login_count: 10}, {time_slot: 10, login_count: 15}, {time_slot: 11, login_count: 8}, 
+               {time_slot: 12, login_count: 5}, {time_slot: 13, login_count: 12}, {time_slot: 14, login_count: 20}]
+            : period === 'week'
+            ? [{day_name: 'Mon', login_count: 20}, {day_name: 'Tue', login_count: 15}, {day_name: 'Wed', login_count: 25}, 
+               {day_name: 'Thu', login_count: 30}, {day_name: 'Fri', login_count: 22}, {day_name: 'Sat', login_count: 18}, 
+               {day_name: 'Sun', login_count: 10}]
+            : [{time_slot: '2023-04-01', login_count: 45}, {time_slot: '2023-04-08', login_count: 60}, 
+               {time_slot: '2023-04-15', login_count: 52}, {time_slot: '2023-04-22', login_count: 48}, 
+               {time_slot: '2023-04-29', login_count: 55}];
+          
+          // Cập nhật biểu đồ với dữ liệu thực hoặc dữ liệu mẫu nếu không có
+          updateUserActivityChart(data.timeline && data.timeline.length > 0 ? data.timeline : mockTimeline, period);
+          
+        } catch (error) {
+          console.error("Error loading user statistics:", error);
+          // Hiển thị thông báo lỗi
+          showToast("Error loading user statistics", "error");
+          // Đặt giá trị mặc định khi có lỗi
+          document.getElementById('unique-users-count').innerText = '0';
+          document.getElementById('online-users-count').innerText = '0';
+          document.getElementById('new-users-count').innerText = '0';
+        } finally {
+          // Ẩn spinner nếu có
+          const loader = document.getElementById("loader");
+          if (loader) loader.classList.add("hidden");
+        }
       }
 
-      updateCombinedChart();
+      function updateUserActivityChart(timeline, period) {
+        console.log("Updating chart with timeline data:", timeline);
+        const ctx = document.getElementById('userActivityChart').getContext('2d');
+        
+        // Xử lý dữ liệu dựa trên loại thời gian
+        let labels = [];
+        let data = [];
+        
+        if (timeline && timeline.length > 0) {
+          timeline.forEach(item => {
+            // Định dạng label dựa trên period
+            let label = '';
+            if (period === 'day') {
+              // Hiển thị giờ
+              label = `${item.time_slot}:00`;
+            } else if (period === 'week' && item.day_name) {
+              // Hiển thị tên ngày
+              label = item.day_name;
+            } else {
+              // Hiển thị ngày
+              const dateStr = item.time_slot;
+              if (dateStr && typeof dateStr === 'string') {
+                const date = new Date(dateStr);
+                label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              } else {
+                label = String(item.time_slot);
+              }
+            }
+            
+            labels.push(label);
+            data.push(item.login_count);
+          });
+        }
+        
+        // Nếu đã có biểu đồ, hủy nó trước khi tạo mới
+        if (userActivityChart) {
+          userActivityChart.destroy();
+        }
+        
+        // Log dữ liệu trước khi vẽ biểu đồ
+        console.log("Chart Data - Labels:", labels);
+        console.log("Chart Data - Values:", data);
+        
+        // Tạo biểu đồ mới
+        userActivityChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'User Logins',
+              data: data,
+              backgroundColor: 'rgba(124, 58, 237, 0.2)',
+              borderColor: 'rgba(124, 58, 237, 1)',
+              borderWidth: 2,
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  drawBorder: false,
+                  color: 'rgba(200, 200, 200, 0.2)',
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+            plugins: {
+              tooltip: {
+                backgroundColor: 'rgba(50, 50, 93, 0.9)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderWidth: 1,
+                bodyFont: {
+                  family: 'Poppins'
+                },
+                titleFont: {
+                  family: 'Poppins',
+                  weight: 'bold'
+                },
+                padding: 12,
+                displayColors: true,
+                boxWidth: 10,
+                boxHeight: 10,
+                boxPadding: 3,
+                usePointStyle: true,
+              },
+              legend: {
+                labels: {
+                  usePointStyle: true,
+                  font: {
+                    family: 'Poppins'
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
 
-      const ctxAccess = document
-        .getElementById("accessStatisticsChart")
-        .getContext("2d");
-      const accessStatisticsChart = new Chart(ctxAccess, {
-        type: "bar",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "Total Access Count",
-              backgroundColor: "rgba(54, 162, 235, 0.5)",
-              borderColor: "rgba(54, 162, 235, 1)",
+      // Toast notification system
+      function showToast(message, type = 'info') {
+        // Tạo toast container nếu chưa có
+        let toastContainer = document.getElementById("toast-container");
+        if (!toastContainer) {
+          toastContainer = document.createElement("div");
+          toastContainer.id = "toast-container";
+          toastContainer.className = "fixed bottom-4 right-4 z-50";
+          document.body.appendChild(toastContainer);
+        }
+        
+        // Chuẩn bị icon dựa theo loại thông báo
+        let bgColor, icon;
+        switch(type) {
+          case 'success':
+            bgColor = 'bg-green-500';
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>`;
+            break;
+          case 'error':
+            bgColor = 'bg-red-500';
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>`;
+            break;
+          default:
+            bgColor = 'bg-primary-600';
+            icon = `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>`;
+        }
+        
+        // Tạo toast
+        const toast = document.createElement("div");
+        toast.className = `${bgColor} text-white flex items-center p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 ease-out mb-2`;
+        toast.innerHTML = `
+          ${icon}
+          <span>${message}</span>
+        `;
+        
+        // Thêm toast vào container
+        toastContainer.appendChild(toast);
+        
+        // Tự động ẩn toast sau 3 giây
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-2");
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      // Tạo loader
+      function createLoader() {
+        if (!document.getElementById("loader")) {
+          const loader = document.createElement("div");
+          loader.id = "loader";
+          loader.className = "fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden";
+          loader.innerHTML = `
+            <div class="bg-white p-5 rounded-lg shadow-lg flex items-center space-x-3">
+              <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Loading...</span>
+            </div>
+          `;
+          document.body.appendChild(loader);
+        }
+      }
+
+      // Storage Statistics Charts
+      let projectSizeChart = null;
+      let storageByProjectChart = null;
+
+      async function loadStorageStatistics() {
+        try {
+          // Hiển thị loader nếu có
+          const loader = document.getElementById("loader");
+          if (loader) loader.classList.remove("hidden");
+          
+          // Gọi API
+          const response = await fetch('/v1/api/storage-statistics');
+          const data = await response.json();
+          console.log("Storage Statistics:", data);
+          
+          // Cập nhật các thẻ thông tin
+          if (data.totalStats) {
+            document.getElementById('total-projects-count').textContent = data.totalStats.totalProjects || 0;
+            document.getElementById('total-storage-size').textContent = data.totalStats.formattedTotalSize || '0 Bytes';
+            document.getElementById('average-storage-size').textContent = data.totalStats.averageSizePerProject || '0 Bytes';
+          }
+          
+          // Cập nhật biểu đồ
+          updateStorageCharts(data);
+          
+        } catch (error) {
+          console.error("Error loading storage statistics:", error);
+          showToast("Error loading storage statistics", "error");
+        } finally {
+          // Ẩn loader nếu có
+          const loader = document.getElementById("loader");
+          if (loader) loader.classList.add("hidden");
+        }
+      }
+
+      function updateStorageCharts(data) {
+        if (!data || !data.projects || data.projects.length === 0) {
+          console.warn("No project storage data available");
+          return;
+        }
+        
+        const ctx1 = document.getElementById('projectSizeChart').getContext('2d');
+        const ctx2 = document.getElementById('storageByProjectChart').getContext('2d');
+        
+        // Limit the number of projects to display (show only top 5 by size)
+        const MAX_PROJECTS_TO_DISPLAY = 5;
+        
+        // Sort projects by size (largest first) and limit to top MAX_PROJECTS_TO_DISPLAY
+        const sortedProjects = [...data.projects].sort((a, b) => b.sizeInBytes - a.sizeInBytes);
+        const topProjects = sortedProjects.slice(0, MAX_PROJECTS_TO_DISPLAY);
+        
+        // Calculate the total size of other projects
+        let otherProjectsSize = 0;
+        if (sortedProjects.length > MAX_PROJECTS_TO_DISPLAY) {
+          otherProjectsSize = sortedProjects
+            .slice(MAX_PROJECTS_TO_DISPLAY)
+            .reduce((sum, project) => sum + project.sizeInBytes, 0);
+        }
+        
+        // Prepare data for charts - truncate long project names
+        let projectNames = topProjects.map(project => {
+          // Truncate long project names to improve chart display
+          return project.projectName.length > 15 
+            ? project.projectName.substring(0, 15) + '...' 
+            : project.projectName;
+        });
+        let projectSizes = topProjects.map(project => project.sizeInBytes);
+        
+        // Add 'Other Projects' if there are more than MAX_PROJECTS_TO_DISPLAY
+        if (otherProjectsSize > 0) {
+          projectNames.push('Other Projects');
+          projectSizes.push(otherProjectsSize);
+        }
+        
+        // Màu tùy chỉnh với gradient đẹp mắt phù hợp với thiết kế
+        const getGradient = (ctx) => {
+          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, 'rgba(99, 102, 241, 0.8)');
+          gradient.addColorStop(1, 'rgba(139, 92, 246, 0.2)');
+          return gradient;
+        };
+        
+        // Biểu đồ phân phối kích thước dự án
+        if (projectSizeChart) {
+          projectSizeChart.destroy();
+        }
+        
+        projectSizeChart = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: projectNames,
+            datasets: [{
+              label: 'Project Size',
+              data: projectSizes,
+              backgroundColor: getGradient(ctx1),
+              borderColor: 'rgba(99, 102, 241, 1)',
               borderWidth: 1,
-              data: [],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
+              borderRadius: 4,
+            }]
           },
-        },
-      });
-
-      function fetchAccessStatistics() {
-        fetch("/v1/amount-access-statistics")
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-
-            const userNames = data.map((entry) => entry.user_name);
-            const accessCounts = data.map((entry) => entry.total_access_count);
-
-            accessStatisticsChart.data.labels = userNames;
-            accessStatisticsChart.data.datasets[0].data = accessCounts;
-            accessStatisticsChart.update();
-          })
-          .catch((error) =>
-            console.error("Error fetching access statistics:", error)
-          );
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 500 // Reduce animation time for better performance
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return bytesToSize(context.raw);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return bytesToSize(value);
+                  },
+                  maxTicksLimit: 6 // Limit number of ticks for better performance
+                },
+                grid: {
+                  drawBorder: false,
+                  color: 'rgba(200, 200, 200, 0.2)'
+                }
+              },
+              x: {
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45
+                },
+                grid: {
+                  display: false
+                }
+              }
+            }
+          }
+        });
+        
+        if (storageByProjectChart) {
+          storageByProjectChart.destroy();
+        }
+        
+        const generateColors = (count) => {
+          const colors = [];
+          const borderColors = [];
+          
+          const baseColors = [
+            [124, 58, 237], // purple-600
+            [109, 40, 217], // purple-700
+            [91, 33, 182],  // purple-800
+            [79, 70, 229],  // indigo-600
+            [67, 56, 202],  // indigo-700
+            [99, 102, 241], // indigo-500
+            [129, 140, 248] // indigo-400
+          ];
+          
+          for (let i = 0; i < count; i++) {
+            const colorIndex = i % baseColors.length;
+            const [r, g, b] = baseColors[colorIndex];
+            colors.push(`rgba(${r}, ${g}, ${b}, 0.7)`);
+            borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`);
+          }
+          
+          return { colors, borderColors };
+        };
+        
+        const { colors, borderColors } = generateColors(projectNames.length);
+        
+        storageByProjectChart = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: projectNames,
+            datasets: [{
+              data: projectSizes,
+              backgroundColor: colors,
+              borderColor: borderColors,
+              borderWidth: 1,
+              hoverOffset: 10
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 500 // Reduce animation time for better performance
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw;
+                    const percentage = ((value / data.totalStats.totalSizeInBytes) * 100).toFixed(1);
+                    return `${label}: ${bytesToSize(value)} (${percentage}%)`;
+                  }
+                }
+              },
+              legend: {
+                position: 'right',
+                labels: {
+                  font: {
+                    family: 'Poppins'
+                  },
+                  boxWidth: 10,
+                  padding: 10
+                }
+              }
+            }
+          }
+        });
       }
 
-      fetchAccessStatistics();
+      // Initialize everything when document is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        createLoader();
+        
+        // Add event listeners
+        document.getElementById('period-day').addEventListener('click', () => loadUserStats('day'));
+        document.getElementById('period-week').addEventListener('click', () => loadUserStats('week'));
+        document.getElementById('period-month').addEventListener('click', () => loadUserStats('month'));
+        
+        // Load initial data
+        loadUserStats('week');
+        loadStorageStatistics(); // Load storage statistics
+      });
+
+      // Export functions to global scope for inline HTML access
+      window.loadUserStats = loadUserStats;
+      window.showToast = showToast;
+      window.loadStorageStatistics = loadStorageStatistics;
     </script>
   </body>
 </html>

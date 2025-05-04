@@ -1,13 +1,11 @@
 import express from "express";
 import { deleteUserById, getAllUser } from "./adminApi.js";
 import "dotenv/config";
-import { pool } from "../config/mysqlConfig.js";
+import { ExecuteStore, pool } from "../config/mysqlConfig.js";
 import jwt from "jsonwebtoken";
 import User from "../model/User.js";
-import { get } from "mongoose";
 import { countAcceessCount, getAccessStatistics } from "./Statistics.js";
 
-//chart data of the liveblock
 
 async function fetchStorageData(roomId) {
   try {
@@ -74,34 +72,14 @@ adminRoute.delete("/api/users/:id", async (req, res) => {
 
 adminRoute.post("/api/login", async (req, res) => {
   const { username } = req.body;
-
   if (!username) {
     return res.status(400).json({ message: "Username is required" });
   }
 
   try {
-    const [rows] = await pool.query(
-      `
-      SELECT u.idUser, u.name, r.name , u.Role_idRole
-      FROM user u
-      JOIN role r ON u.Role_idRole = r.idRole
-      WHERE u.name = ?
-    `,
-      [username]
-    );
-
-    if (rows.length === 0) {
-      return res.status(401).json({ message: "User not found" });
-    }
-
-    const user = rows[0];
-    console.log(user);
-    if (user.name !== "ROLE_ADMIN") {
-      return res.status(403).json({ message: "Access denied" });
-    }
-
+    const [results] = await ExecuteStore("User_LogonAdmin", [username]);
     const token = jwt.sign(
-      { userId: user.idUser, username: user.name },
+      { userId: results?.[0]?.idUser, username: results?.[0]?.name },
       "6d9524cf-6eca-4442-af68-fe0b934c49a7",
       {
         expiresIn: "3h",
@@ -147,7 +125,7 @@ adminRoute.get("/api/users/filter", async (req, res) => {
 
 adminRoute.get("/api/projects", async (req, res) => {
   try {
-    const [projects] = await pool.query("SELECT * FROM project");
+    const [projects] = await ExecuteStore("Project_GetAllProject");
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: "Error fetching projects" });
@@ -158,10 +136,7 @@ adminRoute.get("/api/projects/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM project WHERE idProject = ?",
-      [id]
-    );
+    const [rows] = await ExecuteStore("Project_GetProjectById",[id])
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Project not found" });
@@ -214,9 +189,8 @@ adminRoute.delete("/api/projects/:id", async (req, res) => {
 });
 
 adminRoute.get("/notifications", async (req, res) => {
-  const sql = "SELECT * FROM notification";
   try {
-    const [results] = await pool.query(sql);
+    const [results] = await ExecuteStore("Notification_GetAll");
     res.json(results);
   } catch (err) {
     res.status(500).json(err);
@@ -224,16 +198,10 @@ adminRoute.get("/notifications", async (req, res) => {
 });
 
 adminRoute.get("/notifications/:id", async (req, res) => {
-  const sql = `
-    SELECT n.*, ur.name AS userRequestUsername, ut.name AS userTankerUsername
-    FROM notification n
-    JOIN user ur ON n.user_idUser_taker = ur.idUser
-    JOIN user ut ON n.user_idUser_requested = ut.idUser
-    WHERE n.idNotification = ?
-  `;
+
 
   try {
-    const [results] = await pool.query(sql, [req.params.id]); // Use await and destructure
+    const [results] = await ExecuteStore("UserNotification_GetByID", [req.params.id]); // Use await and destructure
     if (results.length === 0) {
       return res.status(404).json({ message: "Notification not found" });
     }
@@ -254,23 +222,91 @@ adminRoute.delete("/notifications/:id", async (req, res) => {
   }
 });
 
-adminRoute.route("/access-statistics").get(async (req, res) => {
+adminRoute.get("/api/user-statistics", async (req, res) => {
   try {
-    const [results] = await pool.query(getAccessStatistics);
-    res.status(200).json(results);
+    const period = req.query.period || 'week'; 
+    const [results] = await ExecuteStore("User_AccessStatistics", [period]);
+    console.log(results);
+    
+    // Sửa lại response để phù hợp với dữ liệu thực tế
+    const response = {
+      overview: results[0] || {
+        total_logins: 0,
+        unique_users: 0,
+        currently_online: 0,
+        new_users: 0
+      },
+      timeline: [], // Dữ liệu mẫu nếu không có
+      topUsers: []  // Dữ liệu mẫu nếu không có
+    };
+    
+    res.json(response);
   } catch (error) {
-    console.error("Error fetching access statistics:", error);
-    res.status(500).json({ error: "Database query error" });
+    console.error("Error fetching user statistics:", error);
+    res.status(500).json({ message: "Error fetching user statistics" });
   }
 });
-
-adminRoute.route("/amount-access-statistics").get(async (req, res) => {
+adminRoute.get("/api/storage-statistics", async (req, res) => {
   try {
-    const [results] = await pool.query(countAcceessCount);
-    res.status(200).json(results);
+    const [projects] = await ExecuteStore("Project_GetAllProject");
+    
+    const storageStats = [];
+    
+    for (const project of projects) {
+      try {
+        const storageData = await fetchStorageData(project.idProject);
+        
+        // Tính toán kích thước
+        let totalSizeInBytes = 0;
+        
+        if (storageData && storageData.data) {
+          totalSizeInBytes = getTotalSizeInBytes(storageData.data);
+        }
+        
+        const formattedSize = bytesToSize(totalSizeInBytes);
+        
+        storageStats.push({
+          projectId: project.idProject,
+          projectName: project.name,
+          sizeInBytes: totalSizeInBytes,
+          formattedSize,
+          sizeByUnit: {
+            bytes: totalSizeInBytes,
+            kb: totalSizeInBytes / 1024,
+            mb: totalSizeInBytes / (1024 * 1024),
+            gb: totalSizeInBytes / (1024 * 1024 * 1024),
+            tb: totalSizeInBytes / (1024 * 1024 * 1024 * 1024)
+          }
+        });
+      } catch (error) {
+        console.error(`Error fetching storage for project ${project.idProject}:`, error);
+        storageStats.push({
+          projectId: project.idProject,
+          projectName: project.name,
+          sizeInBytes: 0,
+          formattedSize: '0 Bytes',
+          error: 'Failed to fetch storage data',
+          sizeByUnit: { bytes: 0, kb: 0, mb: 0, gb: 0, tb: 0 }
+        });
+      }
+    }
+    
+    const totalBytes = storageStats.reduce((sum, stat) => sum + stat.sizeInBytes, 0);
+    
+    const response = {
+      projects: storageStats,
+      totalStats: {
+        totalProjects: projects.length,
+        totalSizeInBytes: totalBytes,
+        formattedTotalSize: bytesToSize(totalBytes),
+        averageSizePerProject: bytesToSize(totalBytes / (projects.length || 1))
+      }
+    };
+    
+    res.json(response);
   } catch (error) {
-    console.error("Error fetching access statistics:", error);
-    res.status(500).json({ error: "Database query error" });
+    console.error("Error generating storage statistics:", error);
+    res.status(500).json({ message: "Error generating storage statistics" });
   }
 });
 
@@ -283,7 +319,6 @@ adminRoute.get("/invitations", async (req, res) => {
     console.log(error);
   }
 });
-
 adminRoute.get("/invitations/:id", async (req, res) => {
   const { id } = req.params;
   console.log(id);
@@ -304,7 +339,6 @@ adminRoute.get("/invitations/:id", async (req, res) => {
     console.log(error);
   }
 });
-
 adminRoute.delete("/invitations/:id", async (req, res) => {
   const { id } = req.params;
   try {
