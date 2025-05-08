@@ -1,6 +1,6 @@
 import { ExecuteStore, pool } from "../../config/mysqlConfig.js";
 import { REUEST_JOIN_PROJECT } from "../../helper/mail.js";
-import {  GET_PROJECT_TEAM } from "../../Query/project.js";
+import { GET_PROJECT_TEAM } from "../../Query/project.js";
 import { liveblocks } from "../../server.mjs";
 import { InivitationUser } from "../Invitation/Invitation.js";
 import { createNotification } from "../Notification/Notification.js";
@@ -36,7 +36,7 @@ const addProject = async (_, { name, description, listInvite }, context) => {
         description: description,
       },
     });
- 
+
     return result;
   } catch (error) {
     console.log(error);
@@ -56,6 +56,8 @@ const getUserProjects = async (
       context?.uuid,
     ]);
 
+    console.log("getUserProjects", result);
+
     const projects = Array.isArray(result[0])
       ? result[0].map((project) => ({
           idProject: project.project_idProject || project.idProject,
@@ -65,6 +67,10 @@ const getUserProjects = async (
           is_host_user: project.is_host_user?.data?.[0] === 1,
           lastAccessed: project.lastAccessed,
           accessCount: project.accessCount,
+          PublicProjectCount: project.PublicProjectCount,
+          PrivateProjectCount: project.PrivateProjectCount,
+          JoinedProjectsNotOwner: project.JoinedProjectsNotOwner,
+          OwnedProjects: project.OwnedProjects,
         }))
       : [];
 
@@ -210,7 +216,10 @@ const removeUserFromProject = async (
 const checkProject = async (parent, { projectId }, context) => {
   try {
     console.log("checkProject", projectId, context?.uuid);
-    const res = await ExecuteStore("Project_CheckMember", [ context?.uuid, projectId]);
+    const res = await ExecuteStore("Project_CheckMember", [
+      context?.uuid,
+      projectId,
+    ]);
     const data = res[0][0];
     console.log("checkProject", data);
     return {
@@ -222,16 +231,34 @@ const checkProject = async (parent, { projectId }, context) => {
   }
 };
 
-const sendProjectAccessRequestEmail = async (parent, { projectId , message , nameRequest ,imageRequest , emailRequest }, context) => {
+const sendProjectAccessRequestEmail = async (
+  parent,
+  { projectId, message, nameRequest, imageRequest, emailRequest },
+  context
+) => {
   try {
-    const res = await ExecuteStore("Project_RequestJoin", [
-      projectId,
-    ]);
+    const res = await ExecuteStore("Project_RequestJoin", [projectId]);
     const data = res[0][0];
     console.log("sendProjectAccessRequestEmail", data);
-    console.log("sendProjectAccessRequestEmail", projectId , message , nameRequest);
+
     const subject = "Request to join project";
-    await REUEST_JOIN_PROJECT(data.email , subject , data.nameUserHost , {name : nameRequest , email : emailRequest , message : message} , "");
+    await REUEST_JOIN_PROJECT(
+      data.email,
+      subject,
+      data.nameUserHost,
+      { name: nameRequest, email: emailRequest, message: message },
+      ""
+    );
+    console.log("user tanker", data.idUser);
+    console.log("user request", context?.uuid);
+    await createNotification({
+      idNotify: uuidv4(),
+      message: "You have been invited to join the project",
+      userTaker: data.idUser,
+      userRequest: context?.uuid,
+      type: "STANDARD",
+      projectId: projectId,
+    });
     return {
       RetCode: 1,
       RetMessage: "Gửi thành công",
@@ -241,6 +268,27 @@ const sendProjectAccessRequestEmail = async (parent, { projectId , message , nam
   }
 };
 
+const updateProjectVisibility = async (
+  parent,
+  { projectId, visibility },
+  context
+) => {
+  try {
+    const isPrivate = visibility === "private" ? true : false;
+    const res = await ExecuteStore("Project_PublicProject", [
+      projectId,
+      isPrivate,
+    ]);
+    const data = res[0][0];
+    console.log("updateProjectVisibility", data);
+    return {
+      RetCode: res[0][0].retCode,
+      RetMessage: res[0][0].retMessage,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
 export {
   addProject,
   deletedProject,
@@ -252,4 +300,5 @@ export {
   removeUserFromProject,
   checkProject,
   sendProjectAccessRequestEmail,
+  updateProjectVisibility,
 };

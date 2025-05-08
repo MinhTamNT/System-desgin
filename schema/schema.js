@@ -49,7 +49,11 @@ type Project {
   createdAt: String
   updatedAt: String
   access: String
-  is_host_user: Boolean
+  is_host_user: Boolean,
+  PublicProjectCount: Int
+  PrivateProjectCount: Int
+  JoinedProjectsNotOwner: Int
+  OwnedProjects: Int
 }
 
 type PageInfo {
@@ -219,7 +223,7 @@ type Mutation {
     updateCommentPosition(commentId: String!, x: Float!, y: Float!): Comment,
     addPageToProject(projectId: String!, name: String!, content: String): Page,
     sendProjectAccessRequestEmail(projectId: String!, message: String!, nameRequest: String!, imageRequest: String! ,emailRequest:String!): ProccessObj
-    
+    UpdateProjectVisibility(projectId: String!, visibility: String!): ProccessObj
 }
 
 type Subscription {

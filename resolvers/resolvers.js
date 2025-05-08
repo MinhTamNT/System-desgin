@@ -13,6 +13,7 @@ import {
   getUserProjects,
   removeUserFromProject,
   sendProjectAccessRequestEmail,
+  updateProjectVisibility,
   updateRoleProjects,
   updateUserProjectAccess,
 } from "../controller/Project/Project.js";
@@ -121,7 +122,8 @@ export const resolvers = {
     addReaction: addReaction,
     updateCommentPosition: updateCommentPosition,
     addPageToProject: addPageToProject,
-    sendProjectAccessRequestEmail : sendProjectAccessRequestEmail
+    sendProjectAccessRequestEmail: sendProjectAccessRequestEmail,
+    UpdateProjectVisibility: updateProjectVisibility,
   },
   Subscription: {
     notificationCreated: {
