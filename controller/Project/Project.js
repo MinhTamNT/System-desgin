@@ -56,7 +56,6 @@ const getUserProjects = async (
       context?.uuid,
     ]);
 
-    console.log("getUserProjects", result);
 
     const projects = Array.isArray(result[0])
       ? result[0].map((project) => ({

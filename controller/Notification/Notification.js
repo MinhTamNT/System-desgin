@@ -20,6 +20,16 @@ const createNotification = async ({
       projectId
     ]);
     const data = res[0][0];
+   
+
+    console.log("createNotification", data);
+    if(data?.retCode){
+      return {
+        retCode: data.retCode,
+        retMessage: data.retMessage || "Error creating notification",
+      };
+    }
+
     pubsub.publish("NOTIFICATION_CREATED", {
       notificationCreated: {
         idNotification: idNotify,
@@ -33,8 +43,6 @@ const createNotification = async ({
       },
     });
 
-    console.log("createNotification", data);
- 
     return {
       idNotification: data.idNotify,
       message: data.message,

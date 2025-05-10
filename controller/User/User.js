@@ -113,7 +113,6 @@ const addNewUser = async (
 const SearchUserByName = async (_, { searchText }) => {
   try {
     const result = await ExecuteStore("User_SearchUser", [searchText]);
-    console.log(result);
     if (result && result[0] && result[0][0].idUser) {
       const user = result[0][0];
       const checkOnline = await getConnections(user.idUser);

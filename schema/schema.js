@@ -209,8 +209,8 @@ type Query {
 type Mutation {
     addUser(idUser:String!,name: String!, profilePicture: String , email:String! , TokenUser:String! , expireAt: String!): [AddUserResponse]
     addProject(name:String!,description:String! , listInvite:String): ProccessObj
-    InvitedUser(email_content:String! , projectId:String! , userInvited:String!):Inivitation
-    updateInivitation( invitation_idInvitation: String! ,status:Status): Inivitation
+    InvitedUser(email_content:String! , projectId:String! , userInvited:String!):ProccessObj
+    updateInivitation( invitation_idInvitation: String! ,status:Status): ProccessObj
     createConversation(receiverId:String!): Conversation
     createMessage(message:String! , conversationId:ID): Message
     deletedProjectId(projectId:String) : ProccessObj

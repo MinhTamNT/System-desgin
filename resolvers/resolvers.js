@@ -63,7 +63,6 @@ export const resolvers = {
         const result = await ExecuteStore("User_GetUserByID", [
           parent.userRequest,
         ]);
-        console.log("result User", result);
         return result[0];
       } catch (error) {
         console.log(error);
@@ -94,14 +93,11 @@ export const resolvers = {
       console.log("Resolved value:", value);
 
       if (value && value.RetCode !== undefined) {
-        console.log("Resolved to ProccessObj: ", value.RetCode);
         return "ProccessObj"; // Return the type name as a string
       }
       if (value && value.idUser) {
-        console.log("Resolved to User: ", value.idUser);
         return "User";
       }
-      console.log("Unable to determine type for value:", value);
       return null;
     },
   },
